@@ -1,5 +1,5 @@
 import { Assertions, createAssertionsEnvironment } from '@typed/assertions'
-import { Test } from '../types'
+import { Test, TYPED_TEST } from '../types'
 import { createTest } from './createTest'
 
 export function it(
@@ -21,7 +21,7 @@ export function it(
         if (error || stats.count < 1) {
           return resolve({
             type: 'fail',
-            test,
+            name: test[TYPED_TEST].name,
             error: error
               ? error instanceof Error
                 ? error
@@ -30,7 +30,10 @@ export function it(
           })
         }
 
-        resolve({ type: 'pass', test })
+        resolve({
+          type: 'pass',
+          name: test[TYPED_TEST].name,
+        })
       }
 
       if (what.length === 0) {

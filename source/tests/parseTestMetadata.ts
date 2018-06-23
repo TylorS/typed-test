@@ -1,4 +1,3 @@
-import { join } from 'path'
 import {
   Identifier,
   isCallLikeExpression,
@@ -26,7 +25,6 @@ type NodeAndSource<A extends Node = Node> = { node: A; sourceFile: SourceFile }
 type LocalAndExportedIdentifier = { exported: string; local: string; sourceFile: SourceFile }
 
 export function parseTestMetadata(
-  currentDirectory: string,
   sourceFiles: ReadonlyArray<SourceFile>,
   // tslint:disable-next-line:ban-types
   typedTestSymbol: Symbol,
@@ -38,7 +36,7 @@ export function parseTestMetadata(
   const testDeclarationNodes = testNodes.filter(isVariableDeclarationNodeSource(exportedTestNames))
 
   return testDeclarationNodes.map(
-    findTestMetadataFromNodeSource(currentDirectory, exportedTestIdentifiers, testNodes),
+    findTestMetadataFromNodeSource(exportedTestIdentifiers, testNodes),
   )
 }
 
@@ -48,7 +46,6 @@ function isVariableDeclarationNodeSource(exportNames: string[]) {
 }
 
 function findTestMetadataFromNodeSource(
-  currentDirectory: string,
   testIdentifiers: LocalAndExportedIdentifier[],
   testNodes: NodeAndSource[],
 ) {
@@ -70,7 +67,7 @@ function findTestMetadataFromNodeSource(
     return {
       ...findNodeMetadata({ node: statement, sourceFile }),
       exportNames,
-      filePath: join(currentDirectory, sourceFile.fileName),
+      filePath: sourceFile.fileName,
       additionalTests: subTests
         .map(findNodeMetadata)
         .sort(({ position: [a] }, { position: [b] }) => (a === b ? 0 : a < b ? -1 : 1)),

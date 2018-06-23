@@ -20,10 +20,10 @@ export function describe(what: string, tests: Test[]): Test {
           testsToRun.map(
             t =>
               getModifier(t) !== 'skip'
-                ? t.runTest(spec).then(x => ({ ...x, test: t }))
-                : Promise.resolve({ type: 'skip', test: t } as TestResult),
+                ? t.runTest(spec).then(r => ({ ...r, name: t[TYPED_TEST].name }))
+                : Promise.resolve({ type: 'skip', name: t[TYPED_TEST].name } as TestResult),
           ),
-        ).then(results => resolve({ type: 'group', test, results }))
+        ).then(results => resolve({ type: 'group', results, name: test[TYPED_TEST].name }))
       })
     }),
   }

@@ -2,8 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "declaration": true,
+    "esModuleInterop": true,
     "lib": ["es2016", "dom"],
     "moduleResolution": "node",
+    "module": "commonjs",
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

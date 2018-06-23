@@ -50,7 +50,7 @@ async function findMetadata(
         : absoluteSourcePaths.includes(join(currentDirectory, fileName)),
   )
 
-  return parseTestMetadata(currentDirectory, userSourceFiles, typedTestSymbol, typeChecker)
+  return parseTestMetadata(userSourceFiles, typedTestSymbol, typeChecker)
 }
 
 function programData(program: Program) {

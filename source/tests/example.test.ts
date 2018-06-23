@@ -1,7 +1,7 @@
-import { describe } from '@typed/tests/describe'
-import { given } from '@typed/tests/given'
-import { it } from '@typed/tests/it'
-import { skip } from '@typed/tests/skip'
+import { describe } from './describe'
+import { given } from './given'
+import { it } from './it'
+import { skip } from './skip'
 
 export const failing = it('failing', ({ ok }) => ok(false))
 export const passing = it('passing', ({ ok }) => ok(true))
@@ -18,3 +18,5 @@ export const suiteOfSuites = describe.only('More Things', [
   suite,
   suite,
 ])
+
+export default passing

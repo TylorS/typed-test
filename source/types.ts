@@ -19,14 +19,14 @@ export interface TestSpec {
 }
 
 export type TestResult =
-  | { readonly type: 'pass'; readonly test: Test }
-  | { readonly type: 'fail'; readonly error: Error; readonly test: Test }
-  | { readonly type: 'skip'; readonly test: Test }
+  | { readonly type: 'pass'; readonly name: string }
+  | { readonly type: 'fail'; readonly error: Error; readonly name: string }
+  | { readonly type: 'skip'; readonly name: string }
   | GroupResult
 
 export type GroupResult = {
   readonly type: 'group'
-  readonly test: Test
+  readonly name: string
   readonly results: TestResult[]
 }
 

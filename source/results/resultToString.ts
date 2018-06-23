@@ -1,6 +1,6 @@
 import { blue, bold, green, red } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
-import { GroupResult, Test, TestResult, TYPED_TEST } from '../types'
+import { GroupResult, TestResult } from '../types'
 
 export function resultToString(result: TestResult, nested = false): string {
   if (result.type === 'pass') {
@@ -18,8 +18,7 @@ export function resultToString(result: TestResult, nested = false): string {
   return formatGroupResult(result)
 }
 
-function testName(test: Test): string {
-  const { name } = test[TYPED_TEST]
+function testName(name: string): string {
   const itRegex = /^it\s/
   const givenRegex = /^given\s/
 
@@ -34,21 +33,20 @@ function testName(test: Test): string {
   return name
 }
 
-function formatPassingResult({ test }: TestResult, nested: boolean): string {
-  return newLineWhenNotNested(`${green(tick)} ${testName(test)}`, nested)
+function formatPassingResult({ name }: TestResult, nested: boolean): string {
+  return newLineWhenNotNested(`${green(tick)} ${testName(name)}`, nested)
 }
 
-function formatFailingResult({ test }: TestResult, nested: boolean): string {
-  return newLineWhenNotNested(`${red(cross)} ${testName(test)}`, nested)
+function formatFailingResult({ name }: TestResult, nested: boolean): string {
+  return newLineWhenNotNested(`${red(cross)} ${testName(name)}`, nested)
 }
 
-function formatSkippedResult({ test }: TestResult, nested: boolean): string {
-  return newLineWhenNotNested(`${blue('(Skipped)')} ${testName(test)}`, nested)
+function formatSkippedResult({ name }: TestResult, nested: boolean): string {
+  return newLineWhenNotNested(`${blue('(Skipped)')} ${testName(name)}`, nested)
 }
 
 function formatGroupResult(result: GroupResult): string {
-  const name = testName(result.test)
-  const { results } = result
+  const { results, name } = result
 
   return (
     `\n${bold(name)}\n  ` +
