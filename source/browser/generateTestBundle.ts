@@ -1,9 +1,13 @@
+import { join, relative } from 'path'
 import { collectByKey } from '../common/collectByKey'
-import { TestMetadata } from '../types'
 import { flatten } from '../common/flatten'
-import { relative, join } from 'path'
+import { TestMetadata } from '../types'
 
-export function generateTestBundle(fileDirectory: string, metadata: TestMetadata[]): string {
+export function generateTestBundle(
+  fileDirectory: string,
+  port: number,
+  metadata: TestMetadata[],
+): string {
   const stats: Stats = { numberOfTests: 0, testToTestNumber: {} }
   const metadataByFilePath = collectByKey(x => x.filePath, metadata)
   const filePaths = Object.keys(metadataByFilePath)
@@ -15,6 +19,7 @@ export function generateTestBundle(fileDirectory: string, metadata: TestMetadata
   return [
     importStatements.join(`\n`),
     createTestsWithMetadata(stats.testToTestNumber, metadata),
+    `const TYPED_TEST_PORT=${port}`,
     createApi(relativePath),
     createTestRun(relativePath),
     `\n`,
@@ -52,7 +57,7 @@ function createTestsWithMetadata(
   return `const TYPED_TEST_METADATA = [` + tests.join(',') + `\n]\n\n`
 }
 
-function findTestNames({ exportNames, filePath }: TestMetadata): Array<string> {
+function findTestNames({ exportNames, filePath }: TestMetadata): string[] {
   return exportNames.map(x => `${filePath}/${x}`)
 }
 
@@ -65,7 +70,7 @@ function buildImportStatement(
   metadata: TestMetadata[],
 ): string {
   const exportNames = flatten(metadata.map(x => x.exportNames))
-  let importSpecifiers: Array<string> = []
+  const importSpecifiers: string[] = []
 
   for (const exportName of exportNames) {
     const testName = `${filePath}/${exportName}`
