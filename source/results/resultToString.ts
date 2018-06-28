@@ -53,7 +53,7 @@ function formatGroupResult(result: GroupResult): string {
   const { results, name } = result
 
   return (
-    `\n${bold(name)}\n  ` +
+    `\n${bold(testName(name))}\n  ` +
     results
       .map((x, i) => {
         const r = resultToString(x, true)

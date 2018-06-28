@@ -1,3 +1,4 @@
+import { isAbsolute, join } from 'path'
 import { collectByKey } from '../common/collectByKey'
 import { flatten } from '../common/flatten'
 import { getModifier } from '../tests/getModifier'
@@ -5,9 +6,9 @@ import { updateModifier } from '../tests/updateModifier'
 import { TestMetadata, TestsWithMetadata, TYPED_TEST } from '../types'
 import { Test } from '../types'
 
-export function collectTests(testMetadata: TestMetadata[]): TestsWithMetadata[] {
+export function collectTests(cwd: string, testMetadata: TestMetadata[]): TestsWithMetadata[] {
   const metadataByFilePath: Record<string, TestMetadata[]> = collectByKey(
-    x => x.filePath,
+    x => joinIfNotAbsolute(cwd, x.filePath),
     testMetadata,
   )
   const filePaths = Object.keys(metadataByFilePath)
@@ -15,6 +16,10 @@ export function collectTests(testMetadata: TestMetadata[]): TestsWithMetadata[] 
   return flatten(
     filePaths.map(filePath => testsWithMetadata(filePath, metadataByFilePath[filePath])),
   )
+}
+
+function joinIfNotAbsolute(cwd: string, filePath: string) {
+  return isAbsolute(filePath) ? filePath : join(cwd, filePath)
 }
 
 // Must collect whole file at once to properly handle only/skip modifiers

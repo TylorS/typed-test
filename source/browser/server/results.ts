@@ -1,6 +1,5 @@
 import { Request, Response } from 'express'
-import { blue, green, red } from 'typed-colors'
-import { getTestResults, getTestStats, resultsToString, TestStats } from '../../results'
+import { getTestResults, getTestStats, resultsToString, statsToString } from '../../results'
 import { JsonResults } from '../types'
 
 export function results(once: boolean) {
@@ -20,18 +19,4 @@ export function results(once: boolean) {
       process.exit(exitCode)
     }
   }
-}
-
-function statsToString({ passing, failing, skipped }: TestStats): string {
-  let str = `\n${green(String(passing))} Passed`
-
-  if (failing > 0) {
-    str += ` - ${red(String(failing))} Failed`
-  }
-
-  if (skipped > 0) {
-    str += ` - ${blue(String(skipped))} Skipped`
-  }
-
-  return str + `\n`
 }
