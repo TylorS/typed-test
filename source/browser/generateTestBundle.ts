@@ -1,11 +1,12 @@
 import { join, relative } from 'path'
 import { collectByKey } from '../common/collectByKey'
-import { flatten } from '../common/flatten'
+import { chain } from '../common/flatten'
 import { TestMetadata } from '../types'
 
 export function generateTestBundle(
   fileDirectory: string,
   port: number,
+  timeout: number,
   metadata: TestMetadata[],
 ): string {
   const stats: Stats = { numberOfTests: 0, testToTestNumber: {} }
@@ -19,8 +20,7 @@ export function generateTestBundle(
   return [
     importStatements.join(`\n`),
     createTestsWithMetadata(stats.testToTestNumber, metadata),
-    `const TYPED_TEST_PORT=${port}`,
-    createApi(relativePath),
+    createApi(relativePath, port, timeout),
     createTestRun(relativePath),
     `\n`,
   ].join(`\n`)
@@ -34,12 +34,19 @@ function createTestRun(relativePath: string): string {
   ].join(`\n`)
 }
 
-function createApi(relativePath: string): string {
+function createApi(relativePath: string, port: number, timeout: number): string {
   return [
-    `const retrieveMetadata = () => TYPED_TEST_METADATA`,
-    `import { reportResults } from '${join(relativePath, 'reportResults')}'`,
+    `const retrieveMetadata = () => Promise.resolve(TYPED_TEST_METADATA)`,
+    `import { reportResults, console } from '${join(relativePath, 'api')}'`,
     `import { runTests } from '${join(relativePath, '../common/runTests')}'`,
-    `const TypedTest = Object.freeze({ retrieveMetadata, reportResults, runTests })`,
+    `const TypedTest = Object.freeze({
+      retrieveMetadata,
+      reportResults,
+      runTests,
+      console,
+      TIMEOUT: ${timeout},
+      PORT: ${port}
+    })`,
     `export = TypedTest`,
   ].join(`\n`)
 }
@@ -69,7 +76,7 @@ function buildImportStatement(
   filePath: string,
   metadata: TestMetadata[],
 ): string {
-  const exportNames = flatten(metadata.map(x => x.exportNames))
+  const exportNames = chain(x => x.exportNames, metadata)
   const importSpecifiers: string[] = []
 
   for (const exportName of exportNames) {

@@ -1,10 +1,18 @@
 import { BrowserApi } from './types'
 
-export async function run(api: BrowserApi) {
-  const metadata = api.retrieveMetadata()
-  const results = await api.runTests(2000, metadata)
+export async function run({
+  TIMEOUT,
+  retrieveMetadata,
+  runTests,
+  reportResults,
+  console,
+}: BrowserApi) {
+  const metadata = await retrieveMetadata()
 
-  console.log(results)
+  await console.clear()
+  await console.log('Running tests')
+  const results = await runTests(TIMEOUT, metadata)
+  await console.log('Tests Complete')
 
-  await api.reportResults(results)
+  await reportResults(results)
 }

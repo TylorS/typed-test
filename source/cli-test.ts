@@ -1,10 +1,10 @@
 import express from 'express'
 import { writeFileSync } from 'fs'
-import { basename, dirname, join } from 'path'
+import { basename, join } from 'path'
 import tempy from 'tempy'
 import { bundleFileOrExit, createIndexHtml } from './browser'
 import { generateTestBundle } from './browser/generateTestBundle'
-import { results } from './browser/server'
+import { clear, error, log, results } from './browser/server'
 import { findTestMetadata } from './tests'
 
 async function main(cwd: string, port: number) {
@@ -12,7 +12,7 @@ async function main(cwd: string, port: number) {
   const outDir = tempy.directory()
   const input = join(outDir, basename(tempy.file({ extension: 'ts' })))
   const output = join(outDir, basename(tempy.file({ extension: 'js' })))
-  const browserApiFile = generateTestBundle(dirname(input), port, testMetadata)
+  const browserApiFile = generateTestBundle(outDir, port, 2000, testMetadata)
   const indexOut = join(outDir, 'index.html')
 
   writeFileSync(input, browserApiFile)
@@ -24,7 +24,10 @@ async function main(cwd: string, port: number) {
   app.use(express.static(outDir))
   app.use(express.json())
 
-  app.post('/results', results)
+  app.post('/results', results(true))
+  app.post('/log', log)
+  app.post('/error', error)
+  app.get('/clear', clear)
 
   app.listen(port, '0.0.0.0', () => {
     console.log(`Listening on port ${port}!`)

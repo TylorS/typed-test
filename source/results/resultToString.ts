@@ -2,6 +2,10 @@ import { blue, bold, green, red } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
 import { GroupResult, TestResult } from '../types'
 
+export function resultsToString(results: TestResult[]): string {
+  return results.map(x => resultToString(x)).join(`\n`)
+}
+
 export function resultToString(result: TestResult, nested = false): string {
   if (result.type === 'pass') {
     return formatPassingResult(result, nested)

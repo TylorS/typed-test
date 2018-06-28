@@ -1,14 +1,20 @@
 import { TestsWithMetadata, TestsWithResults } from '../types'
 
 export interface BrowserApi {
-  readonly retrieveMetadata: () => TestsWithMetadata[]
+  readonly TIMEOUT: number
+  readonly PORT: number
+  readonly retrieveMetadata: () => Promise<TestsWithMetadata[]>
   readonly runTests: (
     defaultTimeout: number,
     metadata: TestsWithMetadata[],
   ) => Promise<TestsWithResults[]>
   readonly reportResults: (results: TestsWithResults[]) => Promise<void>
+
+  readonly console: {
+    readonly log: (msg: string) => Promise<void>
+    readonly error: (msg: string) => Promise<void>
+    readonly clear: () => Promise<void>
+  }
 }
 
-export type JsonResults = {
-  [K in keyof TestsWithResults]: K extends 'tests' ? never : TestsWithResults[K]
-}
+export type JsonResults = { [K in Exclude<keyof TestsWithResults, 'tests'>]: TestsWithResults[K] }

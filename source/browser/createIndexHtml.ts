@@ -1,15 +1,12 @@
+import { ROOT_ELEMENT_ID } from './constants'
+
 export function createIndexHtml(testFile: string): string {
   return `<html>
   <head>
     <title>Typed Test</title>
-    <style>
-      p {
-        margin: 0 0.25rem;
-      }
-    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="${ROOT_ELEMENT_ID}"></div>
     <script src="./${testFile}"></script>
   </body>
 </html>`

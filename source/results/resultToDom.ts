@@ -44,7 +44,7 @@ function formatGroupResult(result: GroupResult): HTMLElement {
   const container = flexColumn()
 
   return withChildren(withStyle(container, { marginTop: '1rem' }), [
-    boldText(name),
+    testName(name, true),
     withChildren(
       withStyle(flexColumn(), { paddingLeft: '1rem' }),
       results.map((x, i) => {
@@ -60,7 +60,7 @@ function formatGroupResult(result: GroupResult): HTMLElement {
   ])
 }
 
-function testName(name: string): HTMLElement {
+function testName(name: string, bold: boolean = false): HTMLElement {
   const itRegex = /^it\s/
   const givenRegex = /^given\s/
 
@@ -69,9 +69,11 @@ function testName(name: string): HTMLElement {
   }
 
   if (givenRegex.test(name)) {
+    const testNameParsed = name.replace(givenRegex, '').trim()
+
     return withChildren(flexContainer(), [
-      blueText('given '),
-      text(name.replace(givenRegex, '').trim()),
+      blueText('given ', bold),
+      bold ? boldText(testNameParsed) : text(testNameParsed),
     ])
   }
 
@@ -88,15 +90,15 @@ function boldText(txt: string): HTMLParagraphElement {
   return withStyle(text(txt), { fontWeight: '700' })
 }
 
-function blueText(txt: string): HTMLParagraphElement {
-  return withStyle(text(txt), { color: 'blue' })
+function blueText(txt: string, bold: boolean = false): HTMLParagraphElement {
+  return withStyle(bold ? boldText(txt) : text(txt), { color: 'blue' })
 }
 
 function text(s: string): HTMLParagraphElement {
   const element = document.createElement('p')
   element.textContent = s
 
-  return element
+  return withStyle(element, { margin: '0 0.25rem' })
 }
 
 function redCross(): HTMLParagraphElement {
