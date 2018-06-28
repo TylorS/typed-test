@@ -1,3 +1,3 @@
 import { runTypedTest } from './cli/runTypedTest'
 
-runTypedTest({ mode: 'browser' })
+runTypedTest({ mode: 'browser', keepAlive: true })

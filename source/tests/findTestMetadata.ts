@@ -7,7 +7,6 @@ import {
   findNode,
   findTsConfig,
   isTypedTestTestInterface,
-  ProcessResults,
   registerTsPaths,
   typecheckInAnotherProcess,
 } from '../typescript'
@@ -27,20 +26,18 @@ export async function findTestMetadata(
   }
 
   const sourcePaths = await resolveFileGlobs([...files, ...include, ...exclude.map(x => `!${x}`)])
-  const metadata = await findMetadata(sourcePaths, compilerOptions)
+  const [metadata, { exitCode = 0, stderr = '', stdout = '' } = {}] = await Promise.all([
+    findMetadata(sourcePaths, compilerOptions),
+    // Type-check in parellel
+    typeCheck ? typecheckInAnotherProcess(sourcePaths) : Promise.resolve(void 0),
+  ])
 
-  if (typeCheck) {
-    typecheckInAnotherProcess(sourcePaths).then(({ exitCode, stderr, stdout }: ProcessResults) => {
-      if (stdout.trim()) {
-        console.log(stdout)
-      }
+  if (exitCode > 1) {
+    return Promise.reject(new Error(stderr))
+  }
 
-      if (exitCode > 1) {
-        return console.error(stderr)
-      }
-
-      console.log('Type-checking complete.')
-    })
+  if (stdout.trim()) {
+    console.log(stdout)
   }
 
   return metadata
