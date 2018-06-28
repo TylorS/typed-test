@@ -1,7 +1,7 @@
 export type Arity0<A = void> = () => A
 export type Arity1<A, B = void> = (value: A) => B
 
-export const TYPED_TEST = Symbol('@typed/Test')
+export const TYPED_TEST = Symbol.for('@typed/Test')
 
 export interface Test {
   readonly [TYPED_TEST]: TestConfig

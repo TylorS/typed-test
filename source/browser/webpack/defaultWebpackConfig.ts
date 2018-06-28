@@ -1,16 +1,14 @@
-import { dirname, basename } from 'path'
-import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin/lib'
-import { Configuration } from 'webpack'
-import { findConfigFile } from 'typescript'
 import { existsSync } from 'fs'
+import { basename, dirname } from 'path'
+import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin/lib'
+import { findConfigFile } from 'typescript'
+import { Configuration } from 'webpack'
 
-export type WebpackOptions =
-  {
-    cwd: string,
-    input: string,
-    output: string,
-
-  }
+export type WebpackOptions = {
+  cwd: string
+  input: string
+  output: string
+}
 
 export const defaultWebpackConfig = (cwd: string, input: string, output: string): Configuration => {
   const configFile = findConfigFile(cwd, (fileName: string) => existsSync(fileName))
@@ -36,7 +34,7 @@ export const defaultWebpackConfig = (cwd: string, input: string, output: string)
           loader: 'ts-loader',
           options: {
             transpileOnly: true,
-            configFile
+            configFile,
           },
         },
       ],

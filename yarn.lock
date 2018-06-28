@@ -2389,6 +2389,10 @@ onetime@^2.0.0:
   dependencies:
     mimic-fn "^1.0.0"
 
+openport@0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/openport/-/openport-0.0.5.tgz#61c6acba8329aed7637e62964efb58624e98265c"
+
 ora@^0.2.3:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/ora/-/ora-0.2.3.tgz#37527d220adcd53c39b73571d754156d5db657a4"

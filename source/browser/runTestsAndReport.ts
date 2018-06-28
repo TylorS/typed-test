@@ -13,10 +13,12 @@ export async function run({
 }: BrowserApi) {
   const metadata = findTestsToRun(await retrieveMetadata())
 
-  await console.clear()
-  await console.log('Running tests')
+  await console.log('Running tests...')
+  const start = performance.now()
   const results = await runTests(TIMEOUT, metadata)
-  await console.log('Tests Complete')
+  const end = performance.now()
+  const timeToRun = end - start
+  await console.log(`Tests run in: ${timeToRun}`)
 
   await reportResults(results)
 }
