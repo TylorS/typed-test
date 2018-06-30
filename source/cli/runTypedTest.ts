@@ -1,15 +1,20 @@
+import { CompilerOptions } from '../../node_modules/typescript'
 import {
   Browsers,
   findOpenPort,
   getLauncher,
+  JsonResults,
   openBrowser,
   setupBrowser,
   setupServer,
 } from '../browser'
 import { runTests } from '../common/runTests'
 import { collectTests } from '../node'
-import { getTestResults, getTestStats, resultsToString, statsToString } from '../results'
+import { getTestResults, getTestStats, resultsToString, statsToString, TestStats } from '../results'
 import { findTestMetadata } from '../tests'
+import { TestMetadata } from '../types'
+import { findTsConfig, typecheckInAnotherProcess } from '../typescript'
+import { resolveFileGlobs } from './resolveFileGlobs'
 
 export type TypedTestOptions = {
   mode: 'node' | 'browser'
@@ -17,7 +22,10 @@ export type TypedTestOptions = {
   browser: Browsers
   keepAlive: boolean
   typeCheck: boolean
+  watch: boolean
 }
+
+type StatsAndResults = { readonly results: JsonResults[]; readonly stats: TestStats }
 
 const defaultOptions: TypedTestOptions = {
   mode: 'node',
@@ -25,47 +33,89 @@ const defaultOptions: TypedTestOptions = {
   browser: 'chrome',
   keepAlive: false,
   typeCheck: true,
+  watch: false,
 }
 
+const EXCLUDE = ['./node_modules/**']
+
 export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
-  const { mode, timeout, browser, keepAlive, typeCheck }: TypedTestOptions = {
+  const cwd = process.cwd()
+  const options: TypedTestOptions = {
     ...defaultOptions,
     ...userOptions,
   }
-  const cwd = process.cwd()
-  console.log('Finding tests...')
+  const { watch, typeCheck } = options
+  const { compilerOptions, files = [], include = [], exclude = EXCLUDE } = findTsConfig()
+  const sourcePaths = await resolveFileGlobs([...files, ...include, ...exclude.map(x => `!${x}`)])
 
-  if (typeCheck) {
-    console.log('Type-checking files...')
+  const [{ results, stats }, { exitCode = 0, stderr = '', stdout = '' } = {}] = await Promise.all([
+    findAndRunTests(cwd, sourcePaths, compilerOptions, options),
+    typeCheck ? typecheckInAnotherProcess(sourcePaths) : Promise.resolve(void 0),
+  ])
+  const testResults = getTestResults(results)
+  const typedTestExitCode = exitCode > 1 ? exitCode : stats.failing > 0 ? 1 : 0
+
+  console.log(resultsToString(testResults))
+  console.log(statsToString(stats))
+
+  if (stdout) {
+    console.log(stdout.trim())
   }
 
-  const testMetadata = await findTestMetadata(mode, typeCheck)
+  if (typedTestExitCode > 1 && stderr) {
+    console.error(stderr.trim())
+  }
 
-  if (mode === 'browser') {
-    console.log('Bundling tests...')
-    const port = await findOpenPort()
-    const { outputDirectory } = await setupBrowser(cwd, port, timeout, testMetadata)
-    console.log('Spinning up server...')
-    const app = setupServer(outputDirectory, false)
+  if (!watch) {
+    process.exit(typedTestExitCode)
+  }
+}
+
+async function findAndRunTests(
+  cwd: string,
+  sourcePaths: string[],
+  compilerOptions: CompilerOptions,
+  options: TypedTestOptions,
+): Promise<StatsAndResults> {
+  const { mode } = options
+
+  console.log('Finding tests...')
+  const testMetadata = await findTestMetadata(sourcePaths, compilerOptions, mode)
+  const run = options.mode === 'browser' ? runBrowserTests : runNodeTests
+
+  return run(options, cwd, testMetadata)
+}
+
+async function runBrowserTests(
+  { timeout, browser, keepAlive }: TypedTestOptions,
+  cwd: string,
+  testMetadata: TestMetadata[],
+): Promise<StatsAndResults> {
+  console.log('Bundling tests...')
+  const port = await findOpenPort()
+  const { outputDirectory } = await setupBrowser(cwd, port, timeout, testMetadata)
+  console.log('Spinning up server...')
+
+  return new Promise<StatsAndResults>(async resolve => {
+    const app = setupServer(outputDirectory, (results, stats) => resolve({ results, stats }))
     const launch = await getLauncher()
 
     app.listen(port, '0.0.0.0', async () => {
       console.log('Opening browser...')
       await openBrowser(browser, `http://localhost:${port}`, keepAlive, launch)
     })
+  })
+}
 
-    return
-  }
-
+async function runNodeTests(
+  { timeout }: TypedTestOptions,
+  cwd: string,
+  testMetadata: TestMetadata[],
+): Promise<StatsAndResults> {
   console.log('Running tests...')
-  const results = await runTests(timeout, collectTests(cwd, testMetadata))
-  const testResults = getTestResults(results)
+  const testsWithResults = await runTests(timeout, collectTests(cwd, testMetadata))
+  const testResults = getTestResults(testsWithResults)
   const stats = getTestStats(testResults)
 
-  console.log(resultsToString(testResults))
-  console.log(statsToString(stats))
-
-  const exitCode = stats.failing > 0 ? 1 : 0
-
-  process.exit(exitCode)
+  return { results: testsWithResults, stats }
 }

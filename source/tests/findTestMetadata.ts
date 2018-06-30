@@ -1,44 +1,21 @@
 import { isAbsolute, join } from 'path'
 import { register } from 'ts-node'
 import { CompilerOptions, createProgram, Program, Symbol } from 'typescript'
-import { resolveFileGlobs } from '../cli'
 import { TestMetadata } from '../types'
-import {
-  findNode,
-  findTsConfig,
-  isTypedTestTestInterface,
-  registerTsPaths,
-  typecheckInAnotherProcess,
-} from '../typescript'
+import { findNode, isTypedTestTestInterface, registerTsPaths } from '../typescript'
 import { parseTestMetadata } from './parseTestMetadata'
 
-const EXCLUDE = ['./node_modules/**']
-
 export async function findTestMetadata(
+  sourcePaths: string[],
+  compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
-  typeCheck: boolean,
 ): Promise<TestMetadata[]> {
-  const { compilerOptions, files = [], include = [], exclude = EXCLUDE } = findTsConfig()
-
   if (mode === 'node') {
     registerTsPaths(compilerOptions)
     register({ transpileOnly: true })
   }
 
-  const sourcePaths = await resolveFileGlobs([...files, ...include, ...exclude.map(x => `!${x}`)])
-  const [metadata, { exitCode = 0, stderr = '', stdout = '' } = {}] = await Promise.all([
-    findMetadata(sourcePaths, compilerOptions),
-    // Type-check in parellel
-    typeCheck ? typecheckInAnotherProcess(sourcePaths) : Promise.resolve(void 0),
-  ])
-
-  if (exitCode > 1) {
-    return Promise.reject(new Error(stderr))
-  }
-
-  if (stdout.trim()) {
-    console.log(stdout)
-  }
+  const metadata = await findMetadata(sourcePaths, compilerOptions)
 
   return metadata
 }

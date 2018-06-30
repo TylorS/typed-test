@@ -1,22 +1,14 @@
 import { Request, Response } from 'express'
-import { getTestResults, getTestStats, resultsToString, statsToString } from '../../results'
+import { getTestResults, getTestStats, TestStats } from '../../results'
 import { JsonResults } from '../types'
 
-export function results(once: boolean) {
+export function results(cb: (results: JsonResults[], stats: TestStats) => void) {
   return (request: Request, response: Response) => {
-    const body: JsonResults[] = request.body
-    const testResults = getTestResults(body)
-    const stats = getTestStats(testResults)
+    const jsonResults: JsonResults[] = request.body
+    const stats = getTestStats(getTestResults(jsonResults))
 
-    console.log(resultsToString(testResults))
-    console.log(statsToString(stats))
+    cb(jsonResults, stats)
 
     response.status(200).send()
-
-    if (once) {
-      const exitCode = stats.failing > 0 ? 1 : 0
-
-      process.exit(exitCode)
-    }
   }
 }
