@@ -2,6 +2,8 @@ import { Assertions, createAssertionsEnvironment } from '@typed/assertions'
 import { Test, TYPED_TEST } from '../types'
 import { createTest } from './createTest'
 
+export { Assertions }
+
 export function it(
   does: string,
   what: (assertions: Assertions, done: (error?: Error) => void) => any,
