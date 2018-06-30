@@ -1,5 +1,5 @@
 import { CompilerOptions, transpileModule } from 'typescript'
-import { diagnosticsToString } from '.'
+import { diagnosticsToString } from './diagnosticToString'
 
 export function transpileFile(
   contents: string,

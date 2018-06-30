@@ -2,7 +2,9 @@ import { isAbsolute, join } from 'path'
 import { register } from 'ts-node'
 import { CompilerOptions, createProgram, Program, Symbol } from 'typescript'
 import { TestMetadata } from '../types'
-import { findNode, isTypedTestTestInterface, registerTsPaths } from '../typescript'
+import { findNode } from '../typescript/findNode'
+import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
+import { registerTsPaths } from '../typescript/registerTsPaths'
 import { parseTestMetadata } from './parseTestMetadata'
 
 export async function findTestMetadata(

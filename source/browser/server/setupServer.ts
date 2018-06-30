@@ -1,4 +1,4 @@
-import express from 'express'
+import * as express from 'express'
 import { TestStats } from '../../results'
 import { JsonResults } from '../types'
 import { clear } from './clear'

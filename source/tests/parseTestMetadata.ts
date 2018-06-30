@@ -19,7 +19,8 @@ import {
 } from 'typescript'
 import { flatten } from '../common/flatten'
 import { NodeMetadata, TestMetadata } from '../types'
-import { getNodes, hasExports, traverseNode } from '../typescript'
+import { getNodes, hasExports } from '../typescript/dependencies'
+import { traverseNode } from '../typescript/traverseNode'
 
 type NodeAndSource<A extends Node = Node> = { node: A; sourceFile: SourceFile }
 type LocalAndExportedIdentifier = { exported: string; local: string; sourceFile: SourceFile }

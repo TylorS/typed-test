@@ -3,12 +3,18 @@
   "version": "3.0.0",
   "description": "Testing made simple.",
   "main": "lib/index.js",
+  "module": "lib.es2015/index.js",
   "repository": "https://github.com/TylorS/typed-test",
   "author": "Tylor Steinberger <tlsteinberger167@gmail.com>",
   "license": "MIT",
   "private": false,
   "bin": {
     "typed-test": "lib/cli/cli.js"
+  },
+  "scripts": {
+    "build:commonjs": "tsc --outDir lib",
+    "build:es2015": "tsc --module es2015 --outDir lib.es2015",
+    "build": "yarn build:commonjs && yarn build:es2015"
   },
   "devDependencies": {
     "@types/express": "4.16.0",

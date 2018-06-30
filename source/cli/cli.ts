@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import yargs from 'yargs'
+import * as yargs from 'yargs'
 import { runTypedTest, TypedTestOptions } from './runTypedTest'
 
 const options = yargs

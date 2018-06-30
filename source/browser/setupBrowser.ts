@@ -1,6 +1,6 @@
 import { writeFileSync } from 'fs'
 import { basename, join } from 'path'
-import tempy from 'tempy'
+import * as tempy from 'tempy'
 import { TestMetadata } from '../types'
 import { createIndexHtml } from './createIndexHtml'
 import { generateTestBundle } from './generateTestBundle'
