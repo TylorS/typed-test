@@ -1,19 +1,16 @@
 import { CompilerOptions } from '../../node_modules/typescript'
-import {
-  Browsers,
-  findOpenPort,
-  getLauncher,
-  JsonResults,
-  openBrowser,
-  setupBrowser,
-  setupServer,
-} from '../browser'
+import { findOpenPort } from '../browser/findOpenPort'
+import { Browsers, getLauncher, openBrowser } from '../browser/openBrowser'
+import { setupServer } from '../browser/server'
+import { setupBrowser } from '../browser/setupBrowser'
+import { JsonResults } from '../browser/types'
 import { runTests } from '../common/runTests'
-import { collectTests } from '../node'
+import { collectTests } from '../node/collectTests'
 import { getTestResults, getTestStats, resultsToString, statsToString, TestStats } from '../results'
 import { findTestMetadata } from '../tests'
 import { TestMetadata } from '../types'
-import { findTsConfig, typecheckInAnotherProcess } from '../typescript'
+import { findTsConfig } from '../typescript/findTsConfig'
+import { typecheckInAnotherProcess } from '../typescript/typeCheckInAnotherProcess'
 import { resolveFileGlobs } from './resolveFileGlobs'
 
 export type TypedTestOptions = {

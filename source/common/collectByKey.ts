@@ -1,7 +1,5 @@
-import { Arity1 } from '../types'
-
 export function collectByKey<A, K extends PropertyKey = PropertyKey>(
-  f: Arity1<A, K>,
+  f: (value: A) => K,
   list: A[],
 ): Record<K, A[]> {
   const record = {} as Record<K, A[]>
