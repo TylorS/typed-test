@@ -18,8 +18,6 @@ function runTest(defaultTimeout: number) {
   return (test: Test): Promise<TestResult> => {
     const { modifier, timeout = defaultTimeout, name } = test[TYPED_TEST]
 
-    console.log(test)
-
     if (modifier === 'skip') {
       return Promise.resolve({ type: 'skip', name } as TestResult)
     }

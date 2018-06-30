@@ -55,9 +55,6 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
   const testResults = getTestResults(results)
   const typedTestExitCode = exitCode > 1 ? exitCode : stats.failing > 0 ? 1 : 0
 
-  console.log(resultsToString(testResults))
-  console.log(statsToString(stats))
-
   if (stdout) {
     console.log(stdout.trim())
   }
@@ -65,6 +62,9 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
   if (typedTestExitCode > 1 && stderr) {
     console.error(stderr.trim())
   }
+
+  console.log(resultsToString(testResults))
+  console.log(statsToString(stats))
 
   if (!watch) {
     process.exit(typedTestExitCode)
