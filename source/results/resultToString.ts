@@ -1,10 +1,9 @@
 import { errorToString } from 'assertion-error-diff'
-import { blue, bold, green, red } from 'typed-colors'
+import { blue, bold, green, red, underline } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
 import { JsonResults } from '../browser/types'
 import { collectByKey } from '../common/collectByKey'
 import { FailedTestResult, GroupResult, TestResult } from '../types'
-import { getTestResults } from './getTestResults'
 
 export function resultsToString(results: JsonResults[]): string {
   const resultsByFilePath = collectByKey(x => x.filePath, results)
@@ -13,14 +12,23 @@ export function resultsToString(results: JsonResults[]): string {
 
   const lastIndex = filePaths.length - 1
   filePaths.forEach((filePath, index) => {
-    const testResults = getTestResults(resultsByFilePath[filePath])
+    const jsonResults = resultsByFilePath[filePath]
 
     if (index !== 0) {
       str += `\n`
     }
 
-    str += filePath + `\n`
-    str += moveIn(testResults.map(result => resultToString(result)).join(`\n`))
+    str += underline(filePath)
+
+    for (const jsonResult of jsonResults) {
+      str +=
+        `\n` +
+        moveIn(
+          jsonResult.results
+            .map(result => resultToString(filePath + `:${jsonResult.line}`, result))
+            .join(`\n`),
+        )
+    }
 
     if (index !== lastIndex) {
       str += `\n`
@@ -30,20 +38,20 @@ export function resultsToString(results: JsonResults[]): string {
   return str
 }
 
-export function resultToString(result: TestResult, nested = false): string {
+export function resultToString(filePath: string, result: TestResult, nested = false): string {
   if (result.type === 'pass') {
     return formatPassingResult(result, nested)
   }
 
   if (result.type === 'fail') {
-    return formatFailingResult(result, nested)
+    return formatFailingResult(filePath, result, nested)
   }
 
   if (result.type === 'skip') {
     return formatSkippedResult(result, nested)
   }
 
-  return formatGroupResult(result)
+  return formatGroupResult(filePath, result)
 }
 
 function testName(name: string): string {
@@ -65,8 +73,12 @@ function formatPassingResult({ name }: TestResult, nested: boolean): string {
   return newLineWhenNotNested(`${green(tick)} ${testName(name)}`, nested)
 }
 
-function formatFailingResult({ name, error }: FailedTestResult, nested: boolean): string {
-  const resultName = `${red(cross)} ${testName(name)}`
+function formatFailingResult(
+  filePath: string,
+  { name, error }: FailedTestResult,
+  nested: boolean,
+): string {
+  const resultName = `${red(cross)} ${testName(name)} - ${filePath}`
   const resultError = errorToString(error)
 
   return newLineWhenNotNested(resultName + moveIn(`\n` + resultError), nested)
@@ -76,15 +88,15 @@ function formatSkippedResult({ name }: TestResult, nested: boolean): string {
   return newLineWhenNotNested(`${blue('(Skipped)')} ${testName(name)}`, nested)
 }
 
-function formatGroupResult(result: GroupResult): string {
+function formatGroupResult(filePath: string, result: GroupResult): string {
   const { results, name } = result
 
   return (
-    `\n${bold(testName(name))}\n  ` +
+    `\n${underline(bold(testName(name)))}\n  ` +
     moveIn(
       results
         .map((x, i) => {
-          const r = resultToString(x, true)
+          const r = resultToString(filePath, x, true)
 
           if (i > 0 && x.type !== 'group' && results[i - 1].type === 'group') {
             return `\n${r}`
