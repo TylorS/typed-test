@@ -64,6 +64,7 @@ async function watchMetadata(
   // Create the language service files
   const services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
 
+  let firstRun = true
   function findMetadataByFilePath(filePath: string) {
     if (mode === 'node') {
       clear.all()
@@ -74,6 +75,9 @@ async function watchMetadata(
     if (!servicesHost.getScriptFileNames().some(x => x.indexOf(relativeFilePath) > -1)) {
       return
     }
+
+    console.log(firstRun ? 'Finding metadata...' : 'Updating metadata...')
+    firstRun = false
 
     findMetadata([relativeFilePath], services.getProgram()).then(cb)
   }

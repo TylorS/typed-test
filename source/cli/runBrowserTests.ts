@@ -1,6 +1,6 @@
 import { createServer } from 'http'
 import { findOpenPort } from '../browser/findOpenPort'
-import { getLauncher, openBrowser } from '../browser/openBrowser'
+import { BrowserInstance, getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { TestMetadata } from '../types'
@@ -18,8 +18,16 @@ export async function runBrowserTests(
 
   return new Promise<StatsAndResults>(async resolve => {
     let server: ReturnType<typeof createServer>
+    let instance: BrowserInstance
     const app = setupServer(outputDirectory, (results, stats) => {
-      server.close()
+      if (server) {
+        server.close()
+      }
+
+      if (instance) {
+        instance.stop()
+      }
+
       resolve({ results, stats })
     })
     const launch = await getLauncher()
@@ -28,7 +36,7 @@ export async function runBrowserTests(
 
     server.listen(port, '0.0.0.0', async () => {
       console.log('Opening browser...')
-      await openBrowser(browser, `http://localhost:${port}`, keepAlive, launch)
+      instance = await openBrowser(browser, `http://localhost:${port}`, keepAlive, launch)
     })
   })
 }

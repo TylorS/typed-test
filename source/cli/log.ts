@@ -8,6 +8,8 @@ export function logResults(results: JsonResults[]) {
 
   console.log(resultsToString(results))
   console.log(statsToString(stats))
+
+  return results
 }
 
 export function logTypeCheckResults({

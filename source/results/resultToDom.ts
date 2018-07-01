@@ -32,15 +32,18 @@ function formatPassingResult({ name }: TestResult, nested: boolean): HTMLElement
 function formatFailingResult({ name, error }: FailedTestResult, nested: boolean): HTMLElement {
   const testNameElement = withChildren(flexContainer(), [redCross(), testName(name)])
   const errorElement = errorToDom(error)
-  const element = withChildren(flexColumn(), [testNameElement, errorElement])
+  const element = marginTopIfNotNested(
+    withChildren(flexColumn(), [testNameElement, errorElement]),
+    nested,
+  )
 
-  return marginTopIfNotNested(element, nested)
+  return nested ? withStyle(element, { marginBottom: '0.5rem' }) : element
 }
 
 function errorToDom(error: Error) {
   const message = errorMessage(error)
 
-  return withStyle(message, { marginLeft: '0.5rem' })
+  return withStyle(message, { marginLeft: '1.25rem' })
 }
 
 function errorMessage(error: Error) {
@@ -49,7 +52,7 @@ function errorMessage(error: Error) {
 
   return withChildren(
     flexColumn(),
-    parts.map((x, i) => (i > 0 ? withStyle(text(x), { marginLeft: '0.5rem' }) : text(x))),
+    parts.map((x, i) => (i > 0 ? withStyle(text(x), { marginLeft: '1rem' }) : text(x))),
   )
 }
 

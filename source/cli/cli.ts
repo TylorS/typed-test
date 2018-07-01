@@ -29,7 +29,7 @@ const options = yargs
     },
     typeCheck: {
       boolean: true,
-      defaultDescription: 'true',
+      defaultDescription: 'false',
       group: 'Typed Test',
     },
     watch: {

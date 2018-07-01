@@ -30,7 +30,7 @@ const defaultOptions: TypedTestOptions = {
   timeout: 2000,
   browser: 'chrome',
   keepAlive: false,
-  typeCheck: true,
+  typeCheck: false,
   watch: false,
 }
 
@@ -76,18 +76,22 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
     mode,
     removeFilePath,
     async (newMetadata: TestMetadata[]) => {
-      const sourcePaths = newMetadata.map(x => x.filePath)
-      const [{ results, stats }, processResults = { exitCode: 0 }] = await Promise.all([
-        run(options, cwd, newMetadata),
-        typeCheck ? typecheckInAnotherProcess(sourcePaths) : Promise.resolve(void 0),
+      const sourcePaths = Array.from(new Set(newMetadata.map(x => x.filePath)))
+      const resultsPromise = run(options, cwd, newMetadata).then(x => ({
+        ...x,
+        results: logResults(updateResults(x.results)),
+      }))
+      const [{ stats }, processResults = { exitCode: 0 }] = await Promise.all([
+        resultsPromise,
+        typeCheck
+          ? typecheckInAnotherProcess(sourcePaths).then(x => (logTypeCheckResults(x), x))
+          : Promise.resolve(void 0),
       ])
-      const exitCode =
-        processResults.exitCode > 1 ? processResults.exitCode : stats.failing > 0 ? 1 : 0
-
-      logTypeCheckResults(processResults)
-      logResults(updateResults(results))
 
       if (!watch) {
+        const exitCode =
+          processResults.exitCode > 1 ? processResults.exitCode : stats.failing > 0 ? 1 : 0
+
         process.exit(exitCode)
       }
     },

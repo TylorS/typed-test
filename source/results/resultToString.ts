@@ -35,7 +35,7 @@ export function resultsToString(results: JsonResults[]): string {
     }
   })
 
-  return str
+  return str.replace(/\n(\s)+\n(\s)+\n/g, '\n\n')
 }
 
 export function resultToString(filePath: string, result: TestResult, nested = false): string {
@@ -102,7 +102,7 @@ function formatGroupResult(filePath: string, result: GroupResult): string {
             return `\n${r}`
           }
 
-          return r
+          return x.type === 'fail' ? `${r}\n` : r
         })
         .join(`\n`),
     )
