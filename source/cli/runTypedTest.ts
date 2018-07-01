@@ -28,7 +28,7 @@ export type StatsAndResults = {
 const defaultOptions: TypedTestOptions = {
   mode: 'node',
   timeout: 2000,
-  browser: 'chrome',
+  browser: 'chrome-headless',
   keepAlive: false,
   typeCheck: false,
   watch: false,
@@ -75,14 +75,13 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
     compilerOptions,
     mode,
     removeFilePath,
-    async (newMetadata: TestMetadata[]) => {
-      const sourcePaths = Array.from(new Set(newMetadata.map(x => x.filePath)))
-      const resultsPromise = run(options, cwd, newMetadata).then(x => ({
-        ...x,
-        results: logResults(updateResults(x.results)),
-      }))
+    async (metadata: TestMetadata[]) => {
+      const sourcePaths = Array.from(new Set(metadata.map(x => x.filePath)))
       const [{ stats }, processResults = { exitCode: 0 }] = await Promise.all([
-        resultsPromise,
+        run(options, cwd, metadata).then(x => ({
+          ...x,
+          results: logResults(updateResults(x.results)),
+        })),
         typeCheck
           ? typecheckInAnotherProcess(sourcePaths).then(x => (logTypeCheckResults(x), x))
           : Promise.resolve(void 0),

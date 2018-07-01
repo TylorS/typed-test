@@ -1,8 +1,6 @@
 // tslint:disable-next-line:no-var-requires
-const { find } = require('openport')
+const { getPortPromise } = require('portfinder')
 
 export function findOpenPort(): Promise<number> {
-  return new Promise((resolve, reject) =>
-    find((err: Error | null, port: number) => (err ? reject(err) : resolve(port))),
-  )
+  return getPortPromise().then(parseFloat)
 }

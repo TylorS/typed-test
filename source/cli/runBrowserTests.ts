@@ -1,6 +1,7 @@
 import { createServer } from 'http'
+import { launch } from 'puppeteer'
 import { findOpenPort } from '../browser/findOpenPort'
-import { BrowserInstance, getLauncher, openBrowser } from '../browser/openBrowser'
+import { getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { TestMetadata } from '../types'
@@ -18,25 +19,38 @@ export async function runBrowserTests(
 
   return new Promise<StatsAndResults>(async resolve => {
     let server: ReturnType<typeof createServer>
-    let instance: BrowserInstance
+    let dispose: () => void
     const app = setupServer(outputDirectory, (results, stats) => {
       if (server) {
         server.close()
       }
 
-      if (instance) {
-        instance.stop()
+      if (dispose) {
+        dispose()
       }
 
       resolve({ results, stats })
     })
-    const launch = await getLauncher()
 
     server = createServer(app)
 
     server.listen(port, '0.0.0.0', async () => {
+      const url = `http://localhost:${port}`
+
       console.log('Opening browser...')
-      instance = await openBrowser(browser, `http://localhost:${port}`, keepAlive, launch)
+      if (browser !== 'chrome-headless') {
+        const instance = await openBrowser(browser, url, keepAlive, await getLauncher())
+
+        dispose = () => instance.stop()
+
+        return
+      }
+
+      const headlessInstance = await launch()
+      const page = await headlessInstance.newPage()
+      await page.goto(url)
+
+      dispose = () => headlessInstance.close()
     })
   })
 }

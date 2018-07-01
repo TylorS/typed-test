@@ -45,7 +45,14 @@ function tryStopInstance(browser: BrowserInstance) {
   }
 }
 
-export type Browsers = 'chrome' | 'chromium' | 'firefox' | 'opera' | 'safari' | 'ie'
+export type Browsers =
+  | 'chrome-headless'
+  | 'chrome'
+  | 'chromium'
+  | 'firefox'
+  | 'opera'
+  | 'safari'
+  | 'ie'
 
 type JamesBrowserLauncher = (cb: (error: Error | null, launch: BrowserStart) => void) => void
 
