@@ -19,7 +19,6 @@ const options = yargs
     },
     browser: {
       choices: ['chrome', 'chromium', 'firefox', 'opera', 'safari', 'ie'],
-      requiresArg: true,
       defaultDescription: 'chrome',
       group: 'Browser Mode',
     },

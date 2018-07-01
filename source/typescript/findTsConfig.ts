@@ -9,6 +9,7 @@ import { diagnosticToString } from './diagnosticToString'
 
 export type TsConfig = {
   compilerOptions: CompilerOptions
+  configPath: string
   extends?: string | string[]
   files?: string[]
   include?: string[]
@@ -35,5 +36,5 @@ export function findTsConfig(cwd: string = process.cwd()): TsConfig {
     throw new Error(errors.map(x => diagnosticToString(x, cwd)).join('\n'))
   }
 
-  return { ...config, compilerOptions: options }
+  return { ...config, compilerOptions: options, configPath }
 }

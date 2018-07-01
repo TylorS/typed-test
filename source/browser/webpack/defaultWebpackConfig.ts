@@ -20,7 +20,7 @@ export const defaultWebpackConfig = (cwd: string, input: string, output: string)
   return {
     mode: 'development',
     entry: input,
-    devtool: false,
+    devtool: 'inline-source-map',
     output: {
       path: dirname(output),
       filename: basename(output),

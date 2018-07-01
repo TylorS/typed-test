@@ -15,12 +15,15 @@ export interface TestSpec {
   readonly timeout: number
 }
 
-export type TestResult =
-  | { readonly type: 'pass'; readonly name: string }
-  | { readonly type: 'fail'; readonly error: Error; readonly name: string }
-  | { readonly type: 'skip'; readonly name: string }
-  | GroupResult
+export type TestResult = PassedTestResult | SkippedTestResult | FailedTestResult | GroupResult
 
+export type PassedTestResult = { readonly type: 'pass'; readonly name: string }
+export type SkippedTestResult = { readonly type: 'skip'; readonly name: string }
+export type FailedTestResult = {
+  readonly type: 'fail'
+  readonly error: Error
+  readonly name: string
+}
 export type GroupResult = {
   readonly type: 'group'
   readonly name: string

@@ -4,6 +4,7 @@ import { chain } from '../common/flatten'
 import { TestMetadata } from '../types'
 
 export function generateTestBundle(
+  cwd: string,
   fileDirectory: string,
   port: number,
   timeout: number,
@@ -20,7 +21,7 @@ export function generateTestBundle(
   return [
     importStatements.join(`\n`),
     createTestsWithMetadata(stats.testToTestNumber, metadata),
-    createApi(relativePath, port, timeout),
+    createApi(cwd, relativePath, port, timeout),
     createTestRun(relativePath),
     `\n`,
   ].join(`\n`)
@@ -34,12 +35,13 @@ function createTestRun(relativePath: string): string {
   ].join(`\n`)
 }
 
-function createApi(relativePath: string, port: number, timeout: number): string {
+function createApi(cwd: string, relativePath: string, port: number, timeout: number): string {
   return [
     `const retrieveMetadata = () => Promise.resolve(TYPED_TEST_METADATA)`,
     `import { reportResults, console } from '${join(relativePath, 'api')}'`,
     `import { runTests } from '${join(relativePath, '../common/runTests')}'`,
     `const TypedTest = Object.freeze({
+      cwd: '${cwd}',
       retrieveMetadata,
       reportResults,
       runTests,

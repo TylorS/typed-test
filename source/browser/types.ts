@@ -1,6 +1,7 @@
 import { TestsWithMetadata, TestsWithResults } from '../types'
 
 export interface BrowserApi {
+  readonly cwd: string
   readonly TIMEOUT: number
   readonly PORT: number
   readonly retrieveMetadata: () => Promise<TestsWithMetadata[]>
@@ -8,7 +9,7 @@ export interface BrowserApi {
     defaultTimeout: number,
     metadata: TestsWithMetadata[],
   ) => Promise<TestsWithResults[]>
-  readonly reportResults: (results: TestsWithResults[]) => Promise<void>
+  readonly reportResults: (results: TestsWithResults[], cwd: string) => Promise<void>
 
   readonly console: {
     readonly log: (msg: string) => Promise<void>

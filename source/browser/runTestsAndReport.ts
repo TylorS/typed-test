@@ -6,6 +6,7 @@ export async function run({
   runTests,
   reportResults,
   console,
+  cwd,
 }: BrowserApi) {
   const metadata = await retrieveMetadata()
 
@@ -16,5 +17,5 @@ export async function run({
   const timeToRun = Math.round((end - start) * 100) / 100
   await console.log(`Tests run in: ${timeToRun}ms`)
 
-  await reportResults(results)
+  await reportResults(results, cwd)
 }

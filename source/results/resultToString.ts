@@ -1,9 +1,33 @@
+import { errorToString } from 'assertion-error-diff'
 import { blue, bold, green, red } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
-import { GroupResult, TestResult } from '../types'
+import { JsonResults } from '../browser/types'
+import { collectByKey } from '../common/collectByKey'
+import { FailedTestResult, GroupResult, TestResult } from '../types'
+import { getTestResults } from './getTestResults'
 
-export function resultsToString(results: TestResult[]): string {
-  return results.map(x => resultToString(x)).join(`\n`)
+export function resultsToString(results: JsonResults[]): string {
+  const resultsByFilePath = collectByKey(x => x.filePath, results)
+  const filePaths = Object.keys(resultsByFilePath).sort()
+  let str = `\n`
+
+  const lastIndex = filePaths.length - 1
+  filePaths.forEach((filePath, index) => {
+    const testResults = getTestResults(resultsByFilePath[filePath])
+
+    if (index !== 0) {
+      str += `\n`
+    }
+
+    str += filePath + `\n`
+    str += moveIn(testResults.map(result => resultToString(result)).join(`\n`))
+
+    if (index !== lastIndex) {
+      str += `\n`
+    }
+  })
+
+  return str
 }
 
 export function resultToString(result: TestResult, nested = false): string {
@@ -41,8 +65,11 @@ function formatPassingResult({ name }: TestResult, nested: boolean): string {
   return newLineWhenNotNested(`${green(tick)} ${testName(name)}`, nested)
 }
 
-function formatFailingResult({ name }: TestResult, nested: boolean): string {
-  return newLineWhenNotNested(`${red(cross)} ${testName(name)}`, nested)
+function formatFailingResult({ name, error }: FailedTestResult, nested: boolean): string {
+  const resultName = `${red(cross)} ${testName(name)}`
+  const resultError = errorToString(error)
+
+  return newLineWhenNotNested(resultName + moveIn(`\n` + resultError), nested)
 }
 
 function formatSkippedResult({ name }: TestResult, nested: boolean): string {
@@ -54,21 +81,26 @@ function formatGroupResult(result: GroupResult): string {
 
   return (
     `\n${bold(testName(name))}\n  ` +
-    results
-      .map((x, i) => {
-        const r = resultToString(x, true)
+    moveIn(
+      results
+        .map((x, i) => {
+          const r = resultToString(x, true)
 
-        if (i > 0 && x.type !== 'group' && results[i - 1].type === 'group') {
-          return `\n${r}`
-        }
+          if (i > 0 && x.type !== 'group' && results[i - 1].type === 'group') {
+            return `\n${r}`
+          }
 
-        return r
-      })
-      .join(`\n`)
-      .replace(/\n/g, `\n  `)
+          return r
+        })
+        .join(`\n`),
+    )
   )
 }
 
 function newLineWhenNotNested(s: string, nested: boolean) {
   return nested ? s : `\n${s}`
+}
+
+function moveIn(str: string): string {
+  return str.replace(/\n/g, `\n  `)
 }

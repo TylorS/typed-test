@@ -1,5 +1,7 @@
+import { errorToString } from 'assertion-error-diff'
+import { strip } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
-import { GroupResult, TestResult } from '../types'
+import { FailedTestResult, GroupResult, TestResult } from '../types'
 
 export function resultsToDom(results: TestResult[]): HTMLElement {
   return withChildren(flexColumn(), results.map(x => resultToDom(x)))
@@ -27,10 +29,28 @@ function formatPassingResult({ name }: TestResult, nested: boolean): HTMLElement
   return marginTopIfNotNested(element, nested)
 }
 
-function formatFailingResult({ name }: TestResult, nested: boolean): HTMLElement {
-  const element = withChildren(flexContainer(), [redCross(), testName(name)])
+function formatFailingResult({ name, error }: FailedTestResult, nested: boolean): HTMLElement {
+  const testNameElement = withChildren(flexContainer(), [redCross(), testName(name)])
+  const errorElement = errorToDom(error)
+  const element = withChildren(flexColumn(), [testNameElement, errorElement])
 
   return marginTopIfNotNested(element, nested)
+}
+
+function errorToDom(error: Error) {
+  const message = errorMessage(error)
+
+  return withStyle(message, { marginLeft: '0.5rem' })
+}
+
+function errorMessage(error: Error) {
+  const message = strip(errorToString(error)).replace('- expected + actual\n', '')
+  const parts = message.split(/\n/g)
+
+  return withChildren(
+    flexColumn(),
+    parts.map((x, i) => (i > 0 ? withStyle(text(x), { marginLeft: '0.5rem' }) : text(x))),
+  )
 }
 
 function formatSkippedResult({ name }: TestResult, nested: boolean): HTMLElement {

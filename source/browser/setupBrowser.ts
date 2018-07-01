@@ -15,7 +15,7 @@ export async function setupBrowser(
   const outputDirectory = tempy.directory()
   const temporaryPath = join(outputDirectory, basename(tempy.file({ extension: 'ts' })))
   const bundlePath = join(outputDirectory, basename(tempy.file({ extension: 'js' })))
-  const browserApiFile = generateTestBundle(outputDirectory, port, timeout, testMetadata)
+  const browserApiFile = generateTestBundle(cwd, outputDirectory, port, timeout, testMetadata)
   const indexHtmlPath = join(outputDirectory, 'index.html')
 
   writeFileSync(temporaryPath, browserApiFile)
