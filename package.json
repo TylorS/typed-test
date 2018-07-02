@@ -4,6 +4,8 @@
   "description": "Testing made simple.",
   "main": "lib/index.js",
   "module": "lib.es2015/index.js",
+  "typings": "lib/index.d.ts",
+  "types": "lib/index.d.ts",
   "repository": "https://github.com/TylorS/typed-test",
   "author": "Tylor Steinberger <tlsteinberger167@gmail.com>",
   "license": "MIT",
