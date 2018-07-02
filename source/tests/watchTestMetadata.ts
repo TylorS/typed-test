@@ -15,22 +15,24 @@ import { parseTestMetadata } from './parseTestMetadata'
 const watch = require('glob-watcher')
 
 export function watchTestMetadata(
+  cwd: string,
   configPath: string,
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
   removeFile: (filePath: string) => void,
   cb: (metadata: TestMetadata[]) => void,
-): void {
+) {
   if (mode === 'node') {
     registerTsPaths(compilerOptions)
     register({ transpileOnly: true })
   }
 
-  watchMetadata(configPath, fileGlobs, compilerOptions, mode, cb, removeFile)
+  return watchMetadata(cwd, configPath, fileGlobs, compilerOptions, mode, cb, removeFile)
 }
 
 async function watchMetadata(
+  cwd: string,
   configPath: string,
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
@@ -54,7 +56,7 @@ async function watchMetadata(
 
       return ts.ScriptSnapshot.fromString(readFileSync(fileName).toString())
     },
-    getCurrentDirectory: () => process.cwd(),
+    getCurrentDirectory: () => cwd,
     getCompilationSettings: () => compilerOptions,
     getDefaultLibFileName: options => ts.getDefaultLibFilePath(options),
     fileExists: ts.sys.fileExists,

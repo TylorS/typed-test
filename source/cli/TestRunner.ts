@@ -43,7 +43,7 @@ export class TestRunner {
       files = [],
       include = [],
       exclude = EXCLUDE,
-    } = findTsConfig()
+    } = findTsConfig(cwd)
     const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
 
     this.cwd = cwd

@@ -5,6 +5,7 @@ import { TestRunner } from './TestRunner'
 import { TypedTestOptions } from './types'
 
 export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
+  const cwd = process.cwd()
   const {
     fileGlobs,
     compilerOptions,
@@ -12,9 +13,10 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
     options: { mode, watch },
     results: { removeFilePath },
     runTests,
-  } = new TestRunner(process.cwd(), userOptions)
+  } = new TestRunner(cwd, userOptions)
 
   watchTestMetadata(
+    cwd,
     configPath,
     fileGlobs,
     compilerOptions,
