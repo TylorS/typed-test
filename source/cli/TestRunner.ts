@@ -2,7 +2,6 @@ import { CompilerOptions } from 'typescript'
 import { TestMetadata } from '../types'
 import { findTsConfig } from '../typescript/findTsConfig'
 import { ProcessResults, typecheckInAnotherProcess } from '../typescript/typeCheckInAnotherProcess'
-import { logResults, logTypeCheckResults } from './log'
 import { Results } from './Results'
 import { runBrowserTests } from './runBrowserTests'
 import { runNodeTests } from './runNodeTests'
@@ -23,22 +22,28 @@ export class TestRunner {
   public cwd: string
   public options: TypedTestOptions
   public results: Results
-  public run: (
+  public fileGlobs: string[]
+  public compilerOptions: CompilerOptions
+  public configPath: string
+  private run: (
     options: TypedTestOptions,
     cwd: string,
     testMetadata: TestMetadata[],
   ) => Promise<StatsAndResults>
-  public fileGlobs: string[]
-  public compilerOptions: CompilerOptions
 
-  constructor(userOptions?: Partial<TypedTestOptions>) {
-    const cwd = process.cwd()
+  constructor(cwd: string = process.cwd(), userOptions?: Partial<TypedTestOptions>) {
     const options: TypedTestOptions = {
       ...defaultOptions,
       ...userOptions,
     }
 
-    const { compilerOptions, files = [], include = [], exclude = EXCLUDE } = findTsConfig()
+    const {
+      configPath,
+      compilerOptions,
+      files = [],
+      include = [],
+      exclude = EXCLUDE,
+    } = findTsConfig()
     const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
 
     this.cwd = cwd
@@ -47,6 +52,7 @@ export class TestRunner {
     this.run = options.mode === 'node' ? runNodeTests : runBrowserTests
     this.fileGlobs = fileGlobs
     this.compilerOptions = compilerOptions
+    this.configPath = configPath
   }
 
   public runTests = async (
@@ -59,11 +65,9 @@ export class TestRunner {
     const [testResults, processResults = { exitCode: 0 }] = await Promise.all([
       run(options, cwd, metadata).then(x => ({
         ...x,
-        results: logResults(results.updateResults(x.results)),
+        results: results.updateResults(x.results),
       })),
-      typeCheck
-        ? typecheckInAnotherProcess(sourcePaths).then(x => (logTypeCheckResults(x), x))
-        : Promise.resolve(void 0),
+      typeCheck ? typecheckInAnotherProcess(sourcePaths) : Promise.resolve(void 0),
     ])
 
     return [testResults, processResults] as [StatsAndResults, ProcessResults]

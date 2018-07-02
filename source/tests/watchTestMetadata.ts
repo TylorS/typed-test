@@ -8,7 +8,6 @@ import * as ts from 'typescript'
 import { flatten } from '../common/flatten'
 import { TestMetadata } from '../types'
 import { findNode } from '../typescript/findNode'
-import { findTsConfig } from '../typescript/findTsConfig'
 import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
 import { registerTsPaths } from '../typescript/registerTsPaths'
 import { parseTestMetadata } from './parseTestMetadata'
@@ -16,6 +15,7 @@ import { parseTestMetadata } from './parseTestMetadata'
 const watch = require('glob-watcher')
 
 export function watchTestMetadata(
+  configPath: string,
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
@@ -27,17 +27,18 @@ export function watchTestMetadata(
     register({ transpileOnly: true })
   }
 
-  watchMetadata(fileGlobs, mode, cb, removeFile)
+  watchMetadata(configPath, fileGlobs, compilerOptions, mode, cb, removeFile)
 }
 
 async function watchMetadata(
+  configPath: string,
   fileGlobs: string[],
+  compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
   cb: (metadata: TestMetadata[]) => void,
   removeFile: (filePath: string) => void,
 ) {
   const files: ts.MapLike<{ version: number }> = {}
-  const { configPath, compilerOptions } = findTsConfig()
 
   if (!configPath) {
     throw new Error("Could not find a valid 'tsconfig.json'.")
