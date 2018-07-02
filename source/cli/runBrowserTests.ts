@@ -5,7 +5,7 @@ import { getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { TestMetadata } from '../types'
-import { StatsAndResults, TypedTestOptions } from './runTypedTest'
+import { StatsAndResults, TypedTestOptions } from './types'
 
 export async function runBrowserTests(
   { timeout, browser, keepAlive }: TypedTestOptions,

@@ -3,7 +3,7 @@ import { collectTests } from '../node/collectTests'
 import { getTestResults } from '../results/getTestResults'
 import { getTestStats } from '../results/getTestStats'
 import { TestMetadata } from '../types'
-import { StatsAndResults, TypedTestOptions } from './runTypedTest'
+import { StatsAndResults, TypedTestOptions } from './types'
 
 export async function runNodeTests(
   { timeout }: TypedTestOptions,
