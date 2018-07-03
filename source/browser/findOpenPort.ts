@@ -2,5 +2,7 @@
 const { getPortPromise } = require('portfinder')
 
 export function findOpenPort(): Promise<number> {
-  return getPortPromise().then(parseFloat)
+  return getPortPromise()
+    .then(parseFloat)
+    .catch(() => findOpenPort())
 }

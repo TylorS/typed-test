@@ -14,8 +14,8 @@
     "typed-test": "lib/cli/cli.js"
   },
   "scripts": {
-    "build:commonjs": "tsc --outDir lib",
-    "build:es2015": "tsc --module es2015 --outDir lib.es2015",
+    "build:commonjs": "rm -rf lib && tsc --outDir lib",
+    "build:es2015": "rm -rf lib.es2015 && tsc --module es2015 --outDir lib.es2015",
     "build": "yarn build:commonjs && yarn build:es2015",
     "test": "ts-node source/cli/cli.ts"
   },
@@ -48,6 +48,7 @@
     "openport": "0.0.5",
     "portfinder": "1.0.13",
     "puppeteer": "1.5.0",
+    "source-map-support": "0.5.6",
     "sourcemapped-stacktrace": "1.1.8",
     "tempy": "0.2.1",
     "ts-loader": "4.4.2",

@@ -1,10 +1,10 @@
 import { isAbsolute, join } from 'path'
-import { register } from 'ts-node'
 import { CompilerOptions, createProgram, Program, Symbol } from 'typescript'
 import { TestMetadata } from '../types'
 import { findNode } from '../typescript/findNode'
 import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
 import { registerTsPaths } from '../typescript/registerTsPaths'
+import { transpileNode } from '../typescript/transpileNode'
 import { parseTestMetadata } from './parseTestMetadata'
 
 export async function findTestMetadata(
@@ -14,7 +14,7 @@ export async function findTestMetadata(
 ): Promise<TestMetadata[]> {
   if (mode === 'node') {
     registerTsPaths(compilerOptions)
-    register({ transpileOnly: true })
+    transpileNode(process.cwd(), compilerOptions)
   }
 
   const metadata = await findMetadata(sourcePaths, compilerOptions)

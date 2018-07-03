@@ -2,38 +2,36 @@ import * as clear from 'clear-require'
 import { existsSync, readFileSync } from 'fs'
 import { sync } from 'glob'
 import { isAbsolute, join } from 'path'
-import { register } from 'ts-node'
-import { CompilerOptions } from 'typescript'
 import * as ts from 'typescript'
+import { CompilerOptions } from 'typescript'
 import { flatten } from '../common/flatten'
 import { TestMetadata } from '../types'
 import { findNode } from '../typescript/findNode'
 import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
 import { registerTsPaths } from '../typescript/registerTsPaths'
+import { transpileNode } from '../typescript/transpileNode'
 import { parseTestMetadata } from './parseTestMetadata'
 // tslint:disable-next-line:no-var-requires
 const watch = require('glob-watcher')
 
 export function watchTestMetadata(
   cwd: string,
-  configPath: string,
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
   removeFile: (filePath: string) => void,
   cb: (metadata: TestMetadata[]) => void,
-) {
+): Promise<{ close: () => void }> {
   if (mode === 'node') {
     registerTsPaths(compilerOptions)
-    register({ transpileOnly: true })
+    transpileNode(cwd, compilerOptions)
   }
 
-  return watchMetadata(cwd, configPath, fileGlobs, compilerOptions, mode, cb, removeFile)
+  return watchMetadata(cwd, fileGlobs, compilerOptions, mode, cb, removeFile)
 }
 
 async function watchMetadata(
   cwd: string,
-  configPath: string,
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
@@ -41,20 +39,17 @@ async function watchMetadata(
   removeFile: (filePath: string) => void,
 ) {
   const files: ts.MapLike<{ version: number }> = {}
-
-  if (!configPath) {
-    throw new Error("Could not find a valid 'tsconfig.json'.")
-  }
-
   const servicesHost: ts.LanguageServiceHost = {
-    getScriptFileNames: () => flatten(fileGlobs.map(x => sync(x))),
+    getScriptFileNames: () => flatten(fileGlobs.map(x => sync(x, { cwd }))),
     getScriptVersion: fileName => files[fileName] && files[fileName].version.toString(),
     getScriptSnapshot: fileName => {
-      if (!existsSync(fileName)) {
+      const pathname = isAbsolute(fileName) ? fileName : join(cwd, fileName)
+
+      if (!existsSync(pathname)) {
         return undefined
       }
 
-      return ts.ScriptSnapshot.fromString(readFileSync(fileName).toString())
+      return ts.ScriptSnapshot.fromString(readFileSync(pathname).toString())
     },
     getCurrentDirectory: () => cwd,
     getCompilationSettings: () => compilerOptions,
@@ -64,7 +59,6 @@ async function watchMetadata(
     readDirectory: ts.sys.readDirectory,
   }
   const services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
-
   function findMetadataByFilePath(filePath: string) {
     if (mode === 'node') {
       clear.all()
@@ -79,10 +73,11 @@ async function watchMetadata(
     findMetadata([relativeFilePath], services.getProgram()).then(cb)
   }
 
-  const watcher = watch(fileGlobs)
+  const watcher = watch(fileGlobs, { cwd })
 
   console.log('Finding metadata...')
-  findMetadata(servicesHost.getScriptFileNames(), services.getProgram())
+  const filePaths = servicesHost.getScriptFileNames()
+  return findMetadata(filePaths, services.getProgram())
     .then(cb)
     .then(() => {
       watcher.on('change', findMetadataByFilePath)
@@ -96,6 +91,8 @@ async function watchMetadata(
 
         removeFile(filePath)
       })
+
+      return watcher
     })
 }
 

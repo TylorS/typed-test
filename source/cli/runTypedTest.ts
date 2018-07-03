@@ -9,7 +9,6 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
   const {
     fileGlobs,
     compilerOptions,
-    configPath,
     options: { mode, watch },
     results: { removeFilePath },
     runTests,
@@ -17,7 +16,6 @@ export async function runTypedTest(userOptions?: Partial<TypedTestOptions>) {
 
   watchTestMetadata(
     cwd,
-    configPath,
     fileGlobs,
     compilerOptions,
     mode,

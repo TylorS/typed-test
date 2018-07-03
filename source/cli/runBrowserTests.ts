@@ -1,23 +1,36 @@
 import { createServer } from 'http'
 import { launch } from 'puppeteer'
 import { findOpenPort } from '../browser/findOpenPort'
-import { getLauncher, openBrowser } from '../browser/openBrowser'
+import { Browsers, getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { TestMetadata } from '../types'
 import { StatsAndResults, TypedTestOptions } from './types'
 
 export async function runBrowserTests(
-  { timeout, browser, keepAlive }: TypedTestOptions,
+  options: TypedTestOptions,
   cwd: string,
   testMetadata: TestMetadata[],
 ): Promise<StatsAndResults> {
+  const { timeout, browser, keepAlive } = options
+  const { port, outputDirectory } = await setup(cwd, timeout, testMetadata)
+
+  return new Promise<StatsAndResults>(runTests(outputDirectory, browser, keepAlive, port)).catch(
+    () => runBrowserTests(options, cwd, testMetadata),
+  )
+}
+
+async function setup(cwd: string, timeout: number, testMetadata: TestMetadata[]) {
   console.log('Bundling tests...')
   const port = await findOpenPort()
   const { outputDirectory } = await setupBrowser(cwd, port, timeout, testMetadata)
   console.log('Spinning up server...')
 
-  return new Promise<StatsAndResults>(async resolve => {
+  return { port, outputDirectory }
+}
+
+function runTests(outputDirectory: string, browser: Browsers, keepAlive: boolean, port: number) {
+  return async (resolve: (stats: StatsAndResults) => void) => {
     let server: ReturnType<typeof createServer>
     let dispose: () => void
     const app = setupServer(outputDirectory, (results, stats) => {
@@ -34,23 +47,30 @@ export async function runBrowserTests(
 
     server = createServer(app)
 
-    server.listen(port, '0.0.0.0', async () => {
-      const url = `http://localhost:${port}`
+    server.listen(port, '0.0.0.0', () => listen(browser, keepAlive, port, d => (dispose = d)))
+  }
+}
 
-      console.log('Opening browser...')
-      if (browser !== 'chrome-headless') {
-        const instance = await openBrowser(browser, url, keepAlive, await getLauncher())
+async function listen(
+  browser: Browsers,
+  keepAlive: boolean,
+  port: number,
+  setDispose: (dispose: () => void) => void,
+) {
+  const url = `http://localhost:${port}`
 
-        dispose = () => instance.stop()
+  console.log('Opening browser...')
+  if (browser !== 'chrome-headless') {
+    const instance = await openBrowser(browser, url, keepAlive, await getLauncher())
 
-        return
-      }
+    setDispose(() => instance.stop())
 
-      const headlessInstance = await launch()
-      const page = await headlessInstance.newPage()
-      await page.goto(url)
+    return
+  }
 
-      dispose = () => headlessInstance.close()
-    })
-  })
+  const headlessInstance = await launch()
+  const page = await headlessInstance.newPage()
+  await page.goto(url)
+
+  setDispose(() => headlessInstance.close())
 }
