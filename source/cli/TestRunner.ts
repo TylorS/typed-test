@@ -33,8 +33,9 @@ export class TestRunner {
   ) => Promise<StatsAndResults>
 
   constructor(
+    userOptions: Partial<TypedTestOptions>,
+    previousResults: Results | null,
     cwd: string = process.cwd(),
-    userOptions?: Partial<TypedTestOptions>,
     logger?: Logger,
   ) {
     const options: TypedTestOptions = {
@@ -45,7 +46,8 @@ export class TestRunner {
     this.logger = logger || defaultLogger
     this.cwd = cwd
     this.options = options
-    this.results = new Results()
+    this.results = previousResults || new Results()
+
     this.run = options.mode === 'node' ? runNodeTests : runBrowserTests
   }
 
