@@ -1,51 +1,28 @@
-import { isAbsolute, join } from 'path'
-import { CompilerOptions, createProgram, Program, Symbol } from 'typescript'
+import * as clear from 'clear-require'
+import { CompilerOptions } from 'typescript'
+import { getScriptFileNames } from '../cli/getScriptFileNames'
 import { TestMetadata } from '../types'
-import { findNode } from '../typescript/findNode'
-import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
+import { createLanguageService } from '../typescript/createLanguageService'
 import { registerTsPaths } from '../typescript/registerTsPaths'
 import { transpileNode } from '../typescript/transpileNode'
-import { parseTestMetadata } from './parseTestMetadata'
+import { findMetadataFromProgram } from './findMetadataFromProgram'
 
 export async function findTestMetadata(
   cwd: string,
-  sourcePaths: string[],
+  fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
 ): Promise<TestMetadata[]> {
   if (mode === 'node') {
     registerTsPaths(compilerOptions)
-    transpileNode(process.cwd(), compilerOptions)
+    transpileNode(cwd, compilerOptions)
+    clear.all()
   }
 
-  const metadata = await findMetadata(cwd, sourcePaths, compilerOptions)
+  const services = createLanguageService(cwd, fileGlobs, compilerOptions, {})
+  const filePaths = getScriptFileNames(cwd, fileGlobs)
+  const program = services.getProgram()
+  const metadata = await findMetadataFromProgram(filePaths, program)
 
   return metadata
-}
-
-async function findMetadata(
-  cwd: string,
-  sourcePaths: string[],
-  compilerOptions: CompilerOptions,
-): Promise<TestMetadata[]> {
-  const program = createProgram(sourcePaths, compilerOptions)
-  const { typeChecker, sourceFiles } = programData(program)
-  const absoluteSourcePaths = sourcePaths.map(x => join(cwd, x))
-  const typedTestInterface = await findNode(isTypedTestTestInterface(typeChecker), sourceFiles)
-  const typedTestSymbol = typeChecker.getTypeAtLocation(typedTestInterface).getSymbol() as Symbol
-  const userSourceFiles = sourceFiles.filter(
-    ({ fileName }) =>
-      isAbsolute(fileName)
-        ? absoluteSourcePaths.includes(fileName)
-        : absoluteSourcePaths.includes(join(cwd, fileName)),
-  )
-
-  return parseTestMetadata(userSourceFiles, typedTestSymbol, typeChecker)
-}
-
-function programData(program: Program) {
-  return {
-    typeChecker: program.getTypeChecker(),
-    sourceFiles: program.getSourceFiles(),
-  }
 }

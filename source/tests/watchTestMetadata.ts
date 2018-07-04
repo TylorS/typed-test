@@ -1,16 +1,12 @@
 import * as clear from 'clear-require'
-import { existsSync, readFileSync } from 'fs'
-import { sync } from 'glob'
-import { isAbsolute, join } from 'path'
 import * as ts from 'typescript'
 import { CompilerOptions } from 'typescript'
-import { flatten } from '../common/flatten'
+import { getScriptFileNames } from '../cli/getScriptFileNames'
 import { TestMetadata } from '../types'
-import { findNode } from '../typescript/findNode'
-import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
+import { createLanguageService } from '../typescript/createLanguageService'
 import { registerTsPaths } from '../typescript/registerTsPaths'
 import { transpileNode } from '../typescript/transpileNode'
-import { parseTestMetadata } from './parseTestMetadata'
+import { findMetadataFromProgram } from './findMetadataFromProgram'
 // tslint:disable-next-line:no-var-requires
 const watch = require('glob-watcher')
 
@@ -39,45 +35,27 @@ async function watchMetadata(
   removeFile: (filePath: string) => void,
 ) {
   const files: ts.MapLike<{ version: number }> = {}
-  const servicesHost: ts.LanguageServiceHost = {
-    getScriptFileNames: () => flatten(fileGlobs.map(x => sync(x, { cwd }))),
-    getScriptVersion: fileName => files[fileName] && files[fileName].version.toString(),
-    getScriptSnapshot: fileName => {
-      const pathname = isAbsolute(fileName) ? fileName : join(cwd, fileName)
+  const services = createLanguageService(cwd, fileGlobs, compilerOptions, files)
 
-      if (!existsSync(pathname)) {
-        return undefined
-      }
-
-      return ts.ScriptSnapshot.fromString(readFileSync(pathname).toString())
-    },
-    getCurrentDirectory: () => cwd,
-    getCompilationSettings: () => compilerOptions,
-    getDefaultLibFileName: options => ts.getDefaultLibFilePath(options),
-    fileExists: ts.sys.fileExists,
-    readFile: ts.sys.readFile,
-    readDirectory: ts.sys.readDirectory,
-  }
-  const services = ts.createLanguageService(servicesHost, ts.createDocumentRegistry())
   function findMetadataByFilePath(filePath: string) {
     if (mode === 'node') {
       clear.all()
     }
 
-    const relativeFilePath = dropCwd(servicesHost.getCurrentDirectory(), filePath)
+    const relativeFilePath = dropCwd(cwd, filePath)
 
-    if (!servicesHost.getScriptFileNames().some(x => x.indexOf(relativeFilePath) > -1)) {
+    if (!getScriptFileNames(cwd, fileGlobs).some(x => x.indexOf(relativeFilePath) > -1)) {
       return
     }
 
-    findMetadata([relativeFilePath], services.getProgram()).then(cb)
+    findMetadataFromProgram([relativeFilePath], services.getProgram()).then(cb)
   }
 
   const watcher = watch(fileGlobs, { cwd })
 
   console.log('Finding metadata...')
-  const filePaths = servicesHost.getScriptFileNames()
-  return findMetadata(filePaths, services.getProgram())
+  const filePaths = getScriptFileNames(cwd, fileGlobs)
+  return findMetadataFromProgram(filePaths, services.getProgram())
     .then(cb)
     .then(() => {
       watcher.on('change', findMetadataByFilePath)
@@ -100,27 +78,4 @@ function dropCwd(cwd: string, filePath: string): string {
   const cwdRegex = new RegExp(`${cwd}/`)
 
   return filePath.replace(cwdRegex, '')
-}
-
-async function findMetadata(sourcePaths: string[], program: ts.Program): Promise<TestMetadata[]> {
-  const { currentDirectory, typeChecker, sourceFiles } = programData(program)
-  const absoluteSourcePaths = sourcePaths.map(x => join(currentDirectory, x))
-  const typedTestInterface = await findNode(isTypedTestTestInterface(typeChecker), sourceFiles)
-  const typedTestSymbol = typeChecker.getTypeAtLocation(typedTestInterface).getSymbol() as ts.Symbol
-  const userSourceFiles = sourceFiles.filter(
-    ({ fileName }) =>
-      isAbsolute(fileName)
-        ? absoluteSourcePaths.includes(fileName)
-        : absoluteSourcePaths.includes(join(currentDirectory, fileName)),
-  )
-
-  return parseTestMetadata(userSourceFiles, typedTestSymbol, typeChecker)
-}
-
-function programData(program: ts.Program) {
-  return {
-    typeChecker: program.getTypeChecker(),
-    currentDirectory: program.getCurrentDirectory(),
-    sourceFiles: program.getSourceFiles(),
-  }
 }
