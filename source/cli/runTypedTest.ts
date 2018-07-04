@@ -28,7 +28,6 @@ export async function runTypedTest(userOptions?: Options) {
     logger,
     removeFilePath,
     async (metadata: TestMetadata[]) => {
-      metadata.forEach(x => console.log(JSON.stringify(x, null, 2)))
       const [{ stats, results }, processResults] = await runTests(metadata)
 
       logTypeCheckResults(logger, processResults)
