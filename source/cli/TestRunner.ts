@@ -14,6 +14,12 @@ const defaultOptions: TypedTestOptions = {
   watch: false,
 }
 
+const defaultLogger: Logger = {
+  log: (x: string) => Promise.resolve(console.log(x)),
+  error: (x: string) => Promise.resolve(console.error(x)),
+  clear: () => Promise.resolve(console.clear()),
+}
+
 export class TestRunner {
   public cwd: string
   public options: TypedTestOptions
@@ -27,16 +33,16 @@ export class TestRunner {
   ) => Promise<StatsAndResults>
 
   constructor(
-    logger: Logger,
     cwd: string = process.cwd(),
     userOptions?: Partial<TypedTestOptions>,
+    logger?: Logger,
   ) {
     const options: TypedTestOptions = {
       ...defaultOptions,
       ...userOptions,
     }
 
-    this.logger = logger
+    this.logger = logger || defaultLogger
     this.cwd = cwd
     this.options = options
     this.results = new Results()
@@ -61,5 +67,9 @@ export class TestRunner {
     ])
 
     return [testResults, processResults] as [StatsAndResults, ProcessResults]
+  }
+
+  public setLogger = (logger: Logger) => {
+    this.logger = logger
   }
 }

@@ -1,5 +1,5 @@
 import { watchTestMetadata } from '../tests/watchTestMetadata'
-import { Logger, TestMetadata } from '../types'
+import { TestMetadata } from '../types'
 import { findTsConfig } from '../typescript/findTsConfig'
 import { findTypedTestConfig } from './findTypedTestConfig'
 import { logResults, logTypeCheckResults } from './log'
@@ -13,16 +13,12 @@ export async function runTypedTest(userOptions?: Options) {
   const { compilerOptions, files = [], include = [], exclude = EXCLUDE } = findTsConfig(cwd)
   const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
   const typedTestConfig = findTypedTestConfig(compilerOptions, cwd)
-  const logger: Logger = {
-    log: (x: string) => Promise.resolve(console.log(x)),
-    error: (x: string) => Promise.resolve(console.error(x)),
-    clear: () => Promise.resolve(console.clear()),
-  }
   const {
     options: { mode, watch },
     results: { removeFilePath },
     runTests,
-  } = new TestRunner(logger, cwd, { ...typedTestConfig, ...userOptions })
+    logger,
+  } = new TestRunner(cwd, { ...typedTestConfig, ...userOptions })
 
   return watchTestMetadata(
     cwd,

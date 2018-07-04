@@ -1,7 +1,7 @@
 import { Options } from './source'
 
 const config: Options = {
-  mode: 'browser',
+  mode: 'node',
   typeCheck: true,
 }
 
