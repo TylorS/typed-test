@@ -3,10 +3,10 @@ import { chain } from '../common/flatten'
 import { getTestStats, resultsToString, statsToString } from '../results'
 import { ProcessResults } from '../typescript/typeCheckInAnotherProcess'
 
-export function logResults(results: JsonResults[]) {
+export function logResults(cwd: string, results: JsonResults[]) {
   const stats = getTestStats(chain(x => x.results, results))
 
-  console.log(resultsToString(results))
+  console.log(resultsToString(cwd, results))
   console.log(statsToString(stats))
 
   return results
