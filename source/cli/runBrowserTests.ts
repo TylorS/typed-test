@@ -1,5 +1,5 @@
 import { createServer } from 'http'
-import { launch } from 'puppeteer'
+import { sync } from 'resolve'
 import { findOpenPort } from '../browser/findOpenPort'
 import { Browsers, getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
@@ -17,7 +17,7 @@ export async function runBrowserTests(
   const { port, outputDirectory } = await setup(logger, cwd, timeout, testMetadata)
 
   return new Promise<StatsAndResults>(
-    runTests(logger, outputDirectory, browser, keepAlive, port),
+    runTests(cwd, logger, outputDirectory, browser, keepAlive, port),
   ).catch(() => runBrowserTests(options, cwd, logger, testMetadata))
 }
 
@@ -31,6 +31,7 @@ async function setup(logger: Logger, cwd: string, timeout: number, testMetadata:
 }
 
 function runTests(
+  cwd: string,
   logger: Logger,
   outputDirectory: string,
   browser: Browsers,
@@ -55,12 +56,13 @@ function runTests(
     server = createServer(app)
 
     server.listen(port, '0.0.0.0', () =>
-      listen(logger, browser, keepAlive, port, d => (dispose = d)),
+      listen(cwd, logger, browser, keepAlive, port, d => (dispose = d)),
     )
   }
 }
 
 async function listen(
+  cwd: string,
   logger: Logger,
   browser: Browsers,
   keepAlive: boolean,
@@ -77,6 +79,8 @@ async function listen(
 
     return
   }
+
+  const { launch } = require(sync('puppeteer', { basedir: cwd }))
 
   const headlessInstance = await launch()
   setDispose(() => headlessInstance.close())
