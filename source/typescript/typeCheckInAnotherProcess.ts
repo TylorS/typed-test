@@ -9,8 +9,8 @@ const typeCheckCliPath = existsSync(jsPath) ? jsPath : tsPath
 
 export type ProcessResults = { exitCode: number; stdout: string; stderr: string }
 
-export function typecheckInAnotherProcess(files: string[]): Promise<ProcessResults> {
-  return runInAnotherProcess(typeCheckCliPath, files)
+export function typecheckInAnotherProcess(cwd: string, files: string[]): Promise<ProcessResults> {
+  return runInAnotherProcess(typeCheckCliPath, [cwd, ...files])
 }
 
 function runInAnotherProcess(filePath: string, args: string[]): Promise<ProcessResults> {

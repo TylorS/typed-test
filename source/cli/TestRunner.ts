@@ -63,7 +63,7 @@ export class TestRunner {
       typeCheck
         ? logger
             .log('Typechecking...')
-            .then(() => typecheckInAnotherProcess(sourcePaths))
+            .then(() => typecheckInAnotherProcess(cwd, sourcePaths))
             .then(results => logger.log('Typechecking complete.').then(() => results))
         : Promise.resolve(void 0),
     ])
