@@ -1,4 +1,3 @@
-import { writeFileSync } from 'fs'
 import { basename, join } from 'path'
 import * as tempy from 'tempy'
 import { Logger, TestMetadata } from '../types'
@@ -18,6 +17,7 @@ export async function setupBrowser(
   const bundlePath = join(outputDirectory, basename(tempy.file({ extension: 'js' })))
   const browserApiFile = generateTestBundle(cwd, outputDirectory, port, timeout, testMetadata)
   const indexHtmlPath = join(outputDirectory, 'index.html')
+  const { writeFileSync } = require('fs')
 
   writeFileSync(temporaryPath, browserApiFile)
   await bundleFileOrExit(cwd, temporaryPath, bundlePath, logger)

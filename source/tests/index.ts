@@ -1,5 +1,3 @@
-export * from './watchTestMetadata'
-export * from './findTestMetadata'
 export * from './it'
 export * from './describe'
 export * from './given'
