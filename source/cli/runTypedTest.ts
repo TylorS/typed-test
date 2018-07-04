@@ -20,7 +20,7 @@ export async function runTypedTest(userOptions?: Options) {
     runTests,
   } = new TestRunner(cwd, { ...typedTestConfig, ...userOptions })
 
-  watchTestMetadata(
+  return watchTestMetadata(
     cwd,
     fileGlobs,
     compilerOptions,
@@ -34,7 +34,7 @@ export async function runTypedTest(userOptions?: Options) {
 
       if (!watch) {
         const exitCode =
-          processResults.exitCode > 1 ? processResults.exitCode : stats.failing > 0 ? 1 : 0
+          processResults.exitCode > 0 ? processResults.exitCode : stats.failing > 0 ? 1 : 0
 
         process.exit(exitCode)
       }
