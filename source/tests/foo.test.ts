@@ -1,9 +1,9 @@
 import { describe } from './describe'
 import { it } from './it'
 
-const failing = it('failing', ({ ok }) => ok(false))
-const passing = it('passing', ({ ok }) => ok(true))
-const withPromise = it('with promise', ({ ok }) => Promise.resolve(true).then(ok))
-const withPromiseFailing = it('with promise', ({ ok }) => Promise.resolve(true).then(ok))
-
-export const suite = describe('Things', [failing, passing, withPromise, withPromiseFailing])
+export const suite = describe('Things', [
+  it('failing', ({ ok }) => ok(false)),
+  it('passing', ({ ok }) => ok(true)),
+  it('with promise', ({ ok }) => Promise.resolve(true).then(ok)),
+  it('with promise', ({ ok }) => Promise.resolve(true).then(ok)),
+])

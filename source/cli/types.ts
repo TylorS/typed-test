@@ -1,6 +1,6 @@
 import { Browsers } from '../browser/openBrowser'
-import { JsonResults } from '../browser/types'
 import { TestStats } from '../results'
+import { JsonResults } from '../types'
 
 export type TypedTestOptions = {
   mode: 'node' | 'browser'

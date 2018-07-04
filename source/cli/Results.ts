@@ -1,6 +1,6 @@
-import { JsonResults } from '../browser/types'
 import { collectByKey } from '../common/collectByKey'
 import { flatten } from '../common/flatten'
+import { JsonResults } from '../types'
 
 export class Results {
   private resultsMap = new Map<string, JsonResults[]>()

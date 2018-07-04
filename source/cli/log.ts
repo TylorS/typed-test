@@ -1,6 +1,6 @@
-import { JsonResults } from '../browser/types'
 import { chain } from '../common/flatten'
 import { getTestStats, resultsToString, statsToString } from '../results'
+import { JsonResults } from '../types'
 import { ProcessResults } from '../typescript/typeCheckInAnotherProcess'
 
 export function logResults(cwd: string, results: JsonResults[]) {

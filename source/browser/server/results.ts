@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import { getTestResults, getTestStats, TestStats } from '../../results'
-import { TestResult } from '../../types'
-import { JsonResults } from '../types'
+import { JsonResults, TestResult } from '../../types'
 
 export function results(cb: (results: JsonResults[], stats: TestStats) => void) {
   return (request: Request, response: Response) => {

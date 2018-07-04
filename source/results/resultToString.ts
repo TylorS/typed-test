@@ -2,9 +2,8 @@ import { errorToString } from 'assertion-error-diff'
 import { isAbsolute, join } from 'path'
 import { blue, bold, green, red, underline } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
-import { JsonResults } from '../browser/types'
 import { collectByKey } from '../common/collectByKey'
-import { FailedTestResult, GroupResult, TestResult } from '../types'
+import { FailedTestResult, GroupResult, JsonResults, TestResult } from '../types'
 
 function joinIfNotAbsolute(cwd: string, filePath: string): string {
   return isAbsolute(filePath) ? filePath : join(cwd, filePath)
@@ -85,7 +84,7 @@ function formatFailingResult(
   { name, error }: FailedTestResult,
   nested: boolean,
 ): string {
-  const resultName = `${red(cross)} ${testName(name)} - ./${filePath}`
+  const resultName = `${red(cross)} ${testName(name)} - ${filePath}`
   const resultError = errorToString(error)
 
   return newLineWhenNotNested(resultName + moveIn(`\n` + resultError), nested)

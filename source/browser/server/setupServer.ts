@@ -1,6 +1,6 @@
 import * as express from 'express'
 import { TestStats } from '../../results'
-import { JsonResults } from '../types'
+import { JsonResults } from '../../types'
 import { clear } from './clear'
 import { error } from './error'
 import { log } from './log'

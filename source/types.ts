@@ -45,3 +45,4 @@ export interface NodeMetadata {
 
 export type TestsWithMetadata = TestMetadata & { readonly tests: Test[] }
 export type TestsWithResults = TestsWithMetadata & { readonly results: TestResult[] }
+export type JsonResults = { [K in Exclude<keyof TestsWithResults, 'tests'>]: TestsWithResults[K] }

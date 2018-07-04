@@ -17,5 +17,3 @@ export interface BrowserApi {
     readonly clear: () => Promise<void>
   }
 }
-
-export type JsonResults = { [K in Exclude<keyof TestsWithResults, 'tests'>]: TestsWithResults[K] }
