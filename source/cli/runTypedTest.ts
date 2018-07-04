@@ -31,7 +31,7 @@ export async function runTypedTest(userOptions?: Options) {
       const [{ stats, results }, processResults] = await runTests(metadata)
 
       logTypeCheckResults(logger, processResults)
-      logResults(logger, cwd, results)
+      logResults(logger, results)
 
       if (!watch) {
         const exitCode =

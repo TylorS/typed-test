@@ -1,8 +1,8 @@
 import { Options } from './source'
 
 const config: Options = {
-  typeCheck: true,
   mode: 'browser',
+  browser: 'safari',
 }
 
 export default config

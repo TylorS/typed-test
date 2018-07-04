@@ -1,15 +1,10 @@
 import { errorToString } from 'assertion-error-diff'
-import { isAbsolute, join } from 'path'
 import { blue, bold, green, red, underline } from 'typed-colors'
 import { cross, tick } from 'typed-figures'
 import { collectByKey } from '../common/collectByKey'
 import { FailedTestResult, GroupResult, JsonResults, TestResult } from '../types'
 
-function joinIfNotAbsolute(cwd: string, filePath: string): string {
-  return isAbsolute(filePath) ? filePath : join(cwd, filePath)
-}
-
-export function resultsToString(cwd: string, results: JsonResults[]): string {
+export function resultsToString(results: JsonResults[]): string {
   const resultsByFilePath = collectByKey(x => x.filePath, results)
   const filePaths = Object.keys(resultsByFilePath).sort()
   let str = `\n`
@@ -29,9 +24,7 @@ export function resultsToString(cwd: string, results: JsonResults[]): string {
         `\n` +
         moveIn(
           jsonResult.results
-            .map(result =>
-              resultToString(joinIfNotAbsolute(cwd, filePath) + `:${jsonResult.line}`, result),
-            )
+            .map(result => resultToString(filePath + `:${jsonResult.line}`, result))
             .join(`\n`),
         )
     }

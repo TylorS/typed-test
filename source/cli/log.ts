@@ -3,10 +3,10 @@ import { getTestStats, resultsToString, statsToString } from '../results'
 import { JsonResults, Logger } from '../types'
 import { ProcessResults } from '../typescript/typeCheckInAnotherProcess'
 
-export async function logResults(logger: Logger, cwd: string, results: JsonResults[]) {
+export async function logResults(logger: Logger, results: JsonResults[]) {
   const stats = getTestStats(chain(x => x.results, results))
 
-  await logger.log(resultsToString(cwd, results))
+  await logger.log(resultsToString(results))
   await logger.log(statsToString(stats))
 
   return results
