@@ -12,23 +12,20 @@ export function describe(what: string, tests: Test[]): Test {
       ? tests.map(x => (getModifier(x) === 'only' ? x : updateModifier('skip', x)))
       : tests
 
-  const test = {
-    modifier,
-    ...createTest(`${what}`, spec => {
-      return new Promise(async resolve => {
-        Promise.all(
-          testsToRun.map(
-            t =>
-              getModifier(t) !== 'skip'
-                ? t.runTest(spec).then(r => ({ ...r, name: t[TYPED_TEST].name }))
-                : Promise.resolve({ type: 'skip', name: t[TYPED_TEST].name } as TestResult),
-          ),
-        ).then(results => resolve({ type: 'group', results, name: test[TYPED_TEST].name }))
-      })
-    }),
-  }
+  const test: Test = createTest(`${what}`, spec => {
+    return Promise.all(
+      testsToRun.map(t => {
+        return t
+          .runTest({
+            ...spec,
+            skip: getModifier(t) === 'skip' || spec.skip,
+          })
+          .then(r => ({ ...r, name: t[TYPED_TEST].name }))
+      }),
+    ).then(results => ({ type: 'group', results, name: test[TYPED_TEST].name } as TestResult))
+  })
 
-  return test
+  return modifier ? updateModifier(modifier, test) : test
 }
 
 export namespace describe {

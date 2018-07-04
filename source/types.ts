@@ -13,6 +13,7 @@ export interface TestConfig {
 
 export interface TestSpec {
   readonly timeout: number
+  readonly skip: boolean
 }
 
 export type TestResult = PassedTestResult | SkippedTestResult | FailedTestResult | GroupResult

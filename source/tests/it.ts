@@ -9,8 +9,12 @@ export function it(
   does: string,
   what: (assertions: Assertions, done: (error?: Error) => void) => any,
 ): Test {
-  const test = createTest(`it ${does}`, ({ timeout }) => {
+  const test = createTest(`it ${does}`, ({ timeout, skip }) => {
     return new Promise(resolve => {
+      if (skip) {
+        return resolve({ type: 'skip', name: does })
+      }
+
       const { stats, assertions } = createAssertionsEnvironment()
       const id = setTimeout(resolve, timeout, {
         type: 'fail',

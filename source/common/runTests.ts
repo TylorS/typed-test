@@ -16,13 +16,9 @@ export function runTests(
 
 function runTest(defaultTimeout: number) {
   return (test: Test): Promise<TestResult> => {
-    const { modifier, timeout = defaultTimeout, name } = test[TYPED_TEST]
+    const { modifier, timeout = defaultTimeout } = test[TYPED_TEST]
 
-    if (modifier === 'skip') {
-      return Promise.resolve({ type: 'skip', name } as TestResult)
-    }
-
-    return test.runTest({ timeout }).then(x => ({ ...x, name }))
+    return test.runTest({ timeout, skip: modifier === 'skip' })
   }
 }
 
