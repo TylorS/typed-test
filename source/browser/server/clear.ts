@@ -1,7 +1,10 @@
 import { Request, Response } from 'express'
+import { Logger } from '../../types'
 
-export function clear(_: Request, response: Response) {
-  console.log('\x1Bc')
+export function clear(logger: Logger) {
+  return async (_: Request, response: Response) => {
+    await logger.log('\x1Bc')
 
-  return response.status(200).send()
+    return response.status(200).send()
+  }
 }

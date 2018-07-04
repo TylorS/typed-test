@@ -1,7 +1,7 @@
 import { writeFileSync } from 'fs'
 import { basename, join } from 'path'
 import * as tempy from 'tempy'
-import { TestMetadata } from '../types'
+import { Logger, TestMetadata } from '../types'
 import { createIndexHtml } from './createIndexHtml'
 import { generateTestBundle } from './generateTestBundle'
 import { bundleFileOrExit } from './webpack'
@@ -10,6 +10,7 @@ export async function setupBrowser(
   cwd: string,
   port: number,
   timeout: number,
+  logger: Logger,
   testMetadata: TestMetadata[],
 ) {
   const outputDirectory = tempy.directory()
@@ -19,7 +20,7 @@ export async function setupBrowser(
   const indexHtmlPath = join(outputDirectory, 'index.html')
 
   writeFileSync(temporaryPath, browserApiFile)
-  await bundleFileOrExit(cwd, temporaryPath, bundlePath)
+  await bundleFileOrExit(cwd, temporaryPath, bundlePath, logger)
   writeFileSync(indexHtmlPath, createIndexHtml(basename(bundlePath)))
 
   return { outputDirectory, bundlePath, indexHtmlPath }

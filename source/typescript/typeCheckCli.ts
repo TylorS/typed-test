@@ -10,7 +10,6 @@ const program = createProgram(files, compilerOptions)
 const result = typeCheckFiles(program)
 
 if (result === '') {
-  process.stdout.write('Typechecking complete.')
   process.exit(0)
 }
 

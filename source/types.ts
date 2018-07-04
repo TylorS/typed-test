@@ -46,3 +46,9 @@ export interface NodeMetadata {
 export type TestsWithMetadata = TestMetadata & { readonly tests: Test[] }
 export type TestsWithResults = TestsWithMetadata & { readonly results: TestResult[] }
 export type JsonResults = { [K in Exclude<keyof TestsWithResults, 'tests'>]: TestsWithResults[K] }
+
+export interface Logger {
+  readonly log: (msg: string) => Promise<void>
+  readonly error: (msg: string) => Promise<void>
+  readonly clear: (msg: string) => Promise<void>
+}

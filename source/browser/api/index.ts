@@ -1,4 +1,4 @@
-import * as console from './console'
+import * as logger from './logger'
 
-export { console }
+export { logger }
 export * from './reportResults'

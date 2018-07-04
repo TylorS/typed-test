@@ -38,14 +38,14 @@ function createTestRun(relativePath: string): string {
 function createApi(cwd: string, relativePath: string, port: number, timeout: number): string {
   return [
     `const retrieveMetadata = () => Promise.resolve(TYPED_TEST_METADATA)`,
-    `import { reportResults, console } from '${join(relativePath, 'api')}'`,
+    `import { reportResults, logger } from '${join(relativePath, 'api')}'`,
     `import { runTests } from '${join(relativePath, '../common/runTests')}'`,
     `const TypedTest = Object.freeze({
       cwd: '${cwd}',
       retrieveMetadata,
       reportResults,
       runTests,
-      console,
+      logger,
       TIMEOUT: ${timeout},
       PORT: ${port}
     })`,

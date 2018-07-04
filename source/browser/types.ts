@@ -1,4 +1,4 @@
-import { TestsWithMetadata, TestsWithResults } from '../types'
+import { Logger, TestsWithMetadata, TestsWithResults } from '../types'
 
 export interface BrowserApi {
   readonly cwd: string
@@ -11,9 +11,5 @@ export interface BrowserApi {
   ) => Promise<TestsWithResults[]>
   readonly reportResults: (results: TestsWithResults[], cwd: string) => Promise<void>
 
-  readonly console: {
-    readonly log: (msg: string) => Promise<void>
-    readonly error: (msg: string) => Promise<void>
-    readonly clear: () => Promise<void>
-  }
+  readonly logger: Logger
 }

@@ -2,7 +2,7 @@ import * as clear from 'clear-require'
 import * as ts from 'typescript'
 import { CompilerOptions } from 'typescript'
 import { getScriptFileNames } from '../cli/getScriptFileNames'
-import { TestMetadata } from '../types'
+import { Logger, TestMetadata } from '../types'
 import { createLanguageService } from '../typescript/createLanguageService'
 import { registerTsPaths } from '../typescript/registerTsPaths'
 import { transpileNode } from '../typescript/transpileNode'
@@ -15,6 +15,7 @@ export function watchTestMetadata(
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
+  logger: Logger,
   removeFile: (filePath: string) => void,
   cb: (metadata: TestMetadata[]) => void,
 ): Promise<{ close: () => void }> {
@@ -23,7 +24,7 @@ export function watchTestMetadata(
     transpileNode(cwd, compilerOptions)
   }
 
-  return watchMetadata(cwd, fileGlobs, compilerOptions, mode, cb, removeFile)
+  return watchMetadata(cwd, fileGlobs, compilerOptions, mode, logger, cb, removeFile)
 }
 
 async function watchMetadata(
@@ -31,6 +32,7 @@ async function watchMetadata(
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
   mode: 'node' | 'browser',
+  logger: Logger,
   cb: (metadata: TestMetadata[]) => void,
   removeFile: (filePath: string) => void,
 ) {
@@ -53,7 +55,7 @@ async function watchMetadata(
 
   const watcher = watch(fileGlobs, { cwd })
 
-  console.log('Finding metadata...')
+  await logger.log('Finding metadata...')
   const filePaths = getScriptFileNames(cwd, fileGlobs)
   return findMetadataFromProgram(filePaths, services.getProgram())
     .then(cb)

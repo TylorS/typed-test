@@ -1,17 +1,20 @@
 import { Stats } from 'webpack'
+import { Logger } from '../../types'
 
-export function logErrors(err: Error | null, stats: Stats): void {
-  if (err) {
-    console.error(err.stack)
+export function logErrors(logger: Logger) {
+  return async (err: Error | null, stats: Stats, exit: () => void): Promise<void> => {
+    if (err) {
+      await logger.error(err.stack || err.message)
 
-    process.exit(1)
-  }
+      exit()
+    }
 
-  const { errors } = stats.toJson()
+    if (stats.hasErrors()) {
+      for (const e of stats.toJson().errors) {
+        await logger.error(e)
+      }
 
-  if (stats.hasErrors()) {
-    errors.forEach((e: any) => console.error(e))
-
-    process.exit(1)
+      exit()
+    }
   }
 }

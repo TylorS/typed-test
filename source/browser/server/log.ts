@@ -1,7 +1,10 @@
 import { Request, Response } from 'express'
+import { Logger } from '../../types'
 
-export function log(request: Request, response: Response) {
-  console.log(request.body.msg)
+export function log(logger: Logger) {
+  return async (request: Request, response: Response) => {
+    await logger.log(request.body.msg)
 
-  return response.status(200).send()
+    return response.status(200).send()
+  }
 }
