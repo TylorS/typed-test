@@ -50,30 +50,68 @@ function findTestMetadataFromNodeSource(
   testIdentifiers: LocalAndExportedIdentifier[],
   testNodes: NodeAndSource[],
 ) {
-  return ({ node, sourceFile }: NodeAndSource<VariableDeclaration>): TestMetadata => {
-    const statement = ((node as VariableDeclaration).parent as VariableDeclarationList)
-      .parent as VariableStatement
+  return (nodeSource: NodeAndSource<VariableDeclaration>): TestMetadata => {
+    const { node, sourceFile } = nodeSource
+    const statement = (node.parent as VariableDeclarationList).parent as VariableStatement
     const declarationName = findVariableDeclarationName(node)
     const exportNames = testIdentifiers
       .filter(x => x.sourceFile.fileName === sourceFile.fileName && x.local === declarationName)
       .map(x => x.exported)
-    const subTests = testNodes.filter(
-      x =>
-        x.sourceFile === sourceFile &&
-        x.node !== node &&
-        x.node.getStart() > node.getStart() &&
-        x.node.getEnd() < node.getEnd(),
-    )
-
-    return {
+    const subTestNodes = testNodes.filter(findSubTests(nodeSource))
+    const subTests = subTestNodes
+      .map(findNodeMetadata)
+      .sort(({ position: a }, { position: b }) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+    const meta: TestMetadata = {
       ...findNodeMetadata({ node: statement, sourceFile }),
       exportNames,
       filePath: sourceFile.fileName,
-      additionalTests: subTests
-        .map(findNodeMetadata)
-        .sort(({ position: [a] }, { position: [b] }) => (a === b ? 0 : a < b ? -1 : 1)),
+      additionalTests: [],
     }
+
+    return findAdditional(meta, subTests)
   }
+}
+
+function findAdditional<A extends NodeMetadata>(metadata: A, nodes: NodeMetadata[]): A {
+  const possibleTests = nodes
+    .filter(x => isContainedBy(metadata, x))
+    .sort(({ position: a }, { position: b }) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
+
+  if (possibleTests.length === 0) {
+    return metadata
+  }
+
+  const testsWithAddtional = possibleTests
+    .map((x, i) => findAdditional(x, possibleTests.slice(i)))
+    .filter(x => x.additionalTests.length > 0)
+  const others = possibleTests
+    .map((x, i) => findAdditional(x, possibleTests.slice(i)))
+    .filter(x => !testsWithAddtional.some(y => isContainedBy(y, x)))
+  const testsToUse = [
+    ...others,
+    ...testsWithAddtional.filter(
+      x => !testsWithAddtional.some(y => y === x || isContainedBy(y, x)),
+    ),
+  ]
+
+  return {
+    ...(metadata as any),
+    additionalTests: testsToUse.sort(
+      ({ position: a }, { position: b }) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0),
+    ),
+  }
+}
+
+function isContainedBy(parent: NodeMetadata, child: NodeMetadata): boolean {
+  return parent.position[0] < child.position[0] && parent.position[1] > child.position[1]
+}
+
+function findSubTests({ node, sourceFile }: NodeAndSource) {
+  return (x: NodeAndSource): boolean =>
+    x.sourceFile === sourceFile &&
+    x.node !== node &&
+    x.node.getStart() > node.getStart() &&
+    x.node.getEnd() < node.getEnd()
 }
 
 function findNodeMetadata({ node, sourceFile }: NodeAndSource): NodeMetadata {
@@ -87,6 +125,7 @@ function findNodeMetadata({ node, sourceFile }: NodeAndSource): NodeMetadata {
     lines: subLines,
     position: subPosition,
     text: subText,
+    additionalTests: [],
   }
 }
 

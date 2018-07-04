@@ -18,7 +18,7 @@ export async function runTypedTest(userOptions?: Options) {
     results: { removeFilePath },
     runTests,
     logger,
-  } = new TestRunner(cwd, { ...typedTestConfig, ...userOptions })
+  } = new TestRunner({ ...typedTestConfig, ...userOptions }, null, cwd)
 
   return watchTestMetadata(
     cwd,
@@ -28,6 +28,7 @@ export async function runTypedTest(userOptions?: Options) {
     logger,
     removeFilePath,
     async (metadata: TestMetadata[]) => {
+      metadata.forEach(x => console.log(JSON.stringify(x, null, 2)))
       const [{ stats, results }, processResults] = await runTests(metadata)
 
       logTypeCheckResults(logger, processResults)

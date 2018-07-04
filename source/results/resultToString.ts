@@ -25,6 +25,8 @@ export function resultsToString(cwd: string, results: JsonResults[]): string {
     str += underline(filePath)
 
     for (const jsonResult of jsonResults) {
+      console.log(jsonResult)
+
       str +=
         `\n` +
         moveIn(

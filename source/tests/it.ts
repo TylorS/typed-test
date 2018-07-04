@@ -1,6 +1,7 @@
 import { Assertions, createAssertionsEnvironment } from '@typed/assertions'
 import { Test, TYPED_TEST } from '../types'
 import { createTest } from './createTest'
+import { updateModifier } from './updateModifier'
 
 export { Assertions }
 
@@ -64,4 +65,20 @@ export function it(
   })
 
   return test
+}
+
+export namespace it {
+  export function only(
+    does: string,
+    what: (assertions: Assertions, done: (error?: Error) => void) => any,
+  ): Test {
+    return updateModifier('only', it(does, what))
+  }
+
+  export function skip(
+    does: string,
+    what: (assertions: Assertions, done: (error?: Error) => void) => any,
+  ): Test {
+    return updateModifier('skip', it(does, what))
+  }
 }

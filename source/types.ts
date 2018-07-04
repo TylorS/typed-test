@@ -41,6 +41,7 @@ export interface NodeMetadata {
   readonly lines: number
   readonly position: [number, number]
   readonly text: string
+  readonly additionalTests: NodeMetadata[]
 }
 
 export type TestsWithMetadata = TestMetadata & { readonly tests: Test[] }
