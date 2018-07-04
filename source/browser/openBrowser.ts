@@ -21,7 +21,8 @@ export async function openBrowser(
   launch: BrowserStart,
 ): Promise<BrowserInstance> {
   return new Promise<BrowserInstance>((resolve, reject) => {
-    launch(url, { browser, options: ['--disable-gpu'], detached: keepAlive }, (error, instance) => {
+    const args = browser === 'chrome-headless' ? ['--disable-gpu', '--headless'] : ['--disable-gpu']
+    launch(url, { browser, options: args, detached: keepAlive }, (error, instance) => {
       if (error) {
         return reject(error)
       }

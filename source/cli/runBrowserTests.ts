@@ -71,8 +71,8 @@ async function listen(
 ) {
   const url = `http://localhost:${port}`
 
-  await logger.log('Opening browser...')
   if (browser !== 'chrome-headless') {
+    await logger.log('Opening browser...')
     const instance = await openBrowser(browser, url, keepAlive, await getLauncher())
 
     setDispose(() => instance.stop())
@@ -80,11 +80,9 @@ async function listen(
     return
   }
 
-  const { launch } = require(sync('puppeteer', { basedir: cwd }))
+  // tslint:disable-next-line:no-var-requires
+  const { launch } = require(sync('chrome-launcher', { basedir: cwd }))
 
-  const headlessInstance = await launch()
-  setDispose(() => headlessInstance.close())
-
-  const page = await headlessInstance.newPage()
-  await page.goto(url)
+  const chrome = await launch({ startingUrl: url })
+  setDispose(() => chrome.kill())
 }
