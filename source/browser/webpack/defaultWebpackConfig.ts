@@ -1,5 +1,6 @@
 import { existsSync } from 'fs'
 import { basename, dirname } from 'path'
+import { sync } from 'resolve'
 import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin/lib'
 import { findConfigFile } from 'typescript'
 import { Configuration } from 'webpack'
@@ -12,6 +13,7 @@ export type WebpackOptions = {
 
 export const defaultWebpackConfig = (cwd: string, input: string, output: string): Configuration => {
   const configFile = findConfigFile(cwd, (fileName: string) => existsSync(fileName))
+  const tsLoader = sync('ts-loader', { basedir: __dirname })
 
   if (!configFile) {
     throw new Error('Unable to find TypeScript configuration')
@@ -31,7 +33,7 @@ export const defaultWebpackConfig = (cwd: string, input: string, output: string)
       rules: [
         {
           test: /\.tsx?$/,
-          loader: 'ts-loader',
+          loader: tsLoader,
           options: {
             transpileOnly: true,
             configFile,

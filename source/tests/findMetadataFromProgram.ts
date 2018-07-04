@@ -20,7 +20,10 @@ export async function findMetadataFromProgram(
         : absoluteSourcePaths.includes(join(currentDirectory, fileName)),
   )
 
-  return parseTestMetadata(userSourceFiles, typedTestSymbol, typeChecker)
+  return parseTestMetadata(userSourceFiles, typedTestSymbol, typeChecker).map(m => ({
+    ...m,
+    filePath: isAbsolute(m.filePath) ? m.filePath : join(currentDirectory, m.filePath),
+  }))
 }
 
 function programData(program: ts.Program) {

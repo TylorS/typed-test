@@ -13,7 +13,6 @@ export async function runTypedTest(userOptions?: Options) {
   const { compilerOptions, files = [], include = [], exclude = EXCLUDE } = findTsConfig(cwd)
   const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
   const typedTestConfig = findTypedTestConfig(compilerOptions, cwd)
-
   const {
     options: { mode, watch },
     results: { removeFilePath },

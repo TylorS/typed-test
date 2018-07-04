@@ -39,15 +39,12 @@ export class TestRunner {
   public runTests = async (
     metadata: TestMetadata[],
   ): Promise<[StatsAndResults, ProcessResults]> => {
-    const { run, options, cwd, results } = this
+    const { run, options, cwd } = this
     const { typeCheck } = options
 
     const sourcePaths = Array.from(new Set(metadata.map(x => x.filePath)))
     const [testResults, processResults = { exitCode: 0 }] = await Promise.all([
-      run(options, cwd, metadata).then(x => ({
-        ...x,
-        results: results.updateResults(x.results),
-      })),
+      run(options, cwd, metadata),
       typeCheck ? typecheckInAnotherProcess(sourcePaths) : Promise.resolve(void 0),
     ])
 

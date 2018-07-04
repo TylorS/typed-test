@@ -69,8 +69,8 @@ async function listen(
   }
 
   const headlessInstance = await launch()
+  setDispose(() => headlessInstance.close())
+
   const page = await headlessInstance.newPage()
   await page.goto(url)
-
-  setDispose(() => headlessInstance.close())
 }
