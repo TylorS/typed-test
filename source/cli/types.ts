@@ -11,6 +11,8 @@ export type TypedTestOptions = {
   watch: boolean
 }
 
+export type Options = Partial<TypedTestOptions>
+
 export type StatsAndResults = {
   results: JsonResults[]
   stats: TestStats

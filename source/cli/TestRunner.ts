@@ -1,6 +1,4 @@
-import { CompilerOptions } from 'typescript'
 import { TestMetadata } from '../types'
-import { findTsConfig } from '../typescript/findTsConfig'
 import { ProcessResults, typecheckInAnotherProcess } from '../typescript/typeCheckInAnotherProcess'
 import { Results } from './Results'
 import { runBrowserTests } from './runBrowserTests'
@@ -16,15 +14,10 @@ const defaultOptions: TypedTestOptions = {
   watch: false,
 }
 
-const EXCLUDE = ['./node_modules/**']
-
 export class TestRunner {
   public cwd: string
   public options: TypedTestOptions
   public results: Results
-  public fileGlobs: string[]
-  public compilerOptions: CompilerOptions
-  public configPath: string
   private run: (
     options: TypedTestOptions,
     cwd: string,
@@ -37,22 +30,10 @@ export class TestRunner {
       ...userOptions,
     }
 
-    const {
-      configPath,
-      compilerOptions,
-      files = [],
-      include = [],
-      exclude = EXCLUDE,
-    } = findTsConfig(cwd)
-    const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
-
     this.cwd = cwd
     this.options = options
     this.results = new Results()
     this.run = options.mode === 'node' ? runNodeTests : runBrowserTests
-    this.fileGlobs = fileGlobs
-    this.compilerOptions = compilerOptions
-    this.configPath = configPath
   }
 
   public runTests = async (
