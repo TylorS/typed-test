@@ -1,6 +1,6 @@
 {
   "name": "@typed/test",
-  "version": "7.0.9",
+  "version": "7.1.0",
   "description": "Testing made simple.",
   "main": "lib/index.js",
   "module": "lib.es2015/index.js",
