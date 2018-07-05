@@ -16,7 +16,7 @@
   "scripts": {
     "build:commonjs": "rm -rf lib && tsc --outDir lib",
     "build:es2015": "rm -rf lib.es2015 && tsc --module es2015 --outDir lib.es2015",
-    "build": "yarn build:commonjs && yarn build:es2015",
+    "build": "yarn build:commonjs && yarn build:es2015 && chmod +x lib/cli/cli.js",
     "test": "ts-node source/cli/cli.ts"
   },
   "devDependencies": {
