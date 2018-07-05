@@ -18,7 +18,7 @@ export const suite = describe('Things', [
       it('with promise', ({ ok }) => Promise.resolve(true).then(ok)),
 
       describe('Deep Inner things', [
-        it('with promise', ({ ok }) => Promise.resolve(false).then(ok)),
+        it('with promise', ({ ok }) => Promise.resolve(true).then(ok)),
       ]),
     ]),
   ]),
