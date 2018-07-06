@@ -1,8 +1,5 @@
 import { Options } from './source'
 
-const config: Options = {
-  mode: 'browser',
-  browser: 'safari',
-}
+const config: Options = {}
 
 export default config

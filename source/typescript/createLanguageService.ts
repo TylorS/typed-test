@@ -11,7 +11,11 @@ export function createLanguageService(
 ): ts.LanguageService {
   const servicesHost: ts.LanguageServiceHost = {
     getScriptFileNames: () => getScriptFileNames(cwd, fileGlobs),
-    getScriptVersion: fileName => files[fileName] && files[fileName].version.toString(),
+    getScriptVersion: fileName => {
+      const key = isAbsolute(fileName) ? fileName : join(cwd, fileName)
+
+      return files[key] && files[key].version.toString()
+    },
     getScriptSnapshot: fileName => {
       const pathname = isAbsolute(fileName) ? fileName : join(cwd, fileName)
 

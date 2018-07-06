@@ -10,7 +10,7 @@ export async function findMetadataFromProgram(
   program: ts.Program,
 ): Promise<TestMetadata[]> {
   const { currentDirectory, typeChecker, sourceFiles } = programData(program)
-  const absoluteSourcePaths = sourcePaths.map(x => join(currentDirectory, x))
+  const absoluteSourcePaths = sourcePaths.map(x => (isAbsolute(x) ? x : join(currentDirectory, x)))
   const typedTestInterface = await findNode(isTypedTestTestInterface(typeChecker), sourceFiles)
   const typedTestSymbol = typeChecker.getTypeAtLocation(typedTestInterface).getSymbol() as ts.Symbol
   const userSourceFiles = sourceFiles.filter(
