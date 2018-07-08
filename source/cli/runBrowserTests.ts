@@ -1,7 +1,7 @@
 import { createServer } from 'http'
 import { sync } from 'resolve'
 import { findOpenPort } from '../browser/findOpenPort'
-import { Browsers, getLauncher, openBrowser } from '../browser/openBrowser'
+import { getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { Logger, TestMetadata } from '../types'
@@ -13,12 +13,12 @@ export async function runBrowserTests(
   logger: Logger,
   testMetadata: TestMetadata[],
 ): Promise<StatsAndResults> {
-  const { timeout, browser, keepAlive } = options
+  const { timeout } = options
   const { port, outputDirectory } = await setup(logger, cwd, timeout, testMetadata)
 
-  return new Promise<StatsAndResults>(
-    runTests(cwd, logger, outputDirectory, browser, keepAlive, port),
-  ).catch(() => runBrowserTests(options, cwd, logger, testMetadata))
+  return new Promise<StatsAndResults>(runTests(cwd, options, logger, outputDirectory, port)).catch(
+    () => runBrowserTests(options, cwd, logger, testMetadata),
+  )
 }
 
 async function setup(logger: Logger, cwd: string, timeout: number, testMetadata: TestMetadata[]) {
@@ -32,13 +32,14 @@ async function setup(logger: Logger, cwd: string, timeout: number, testMetadata:
 
 function runTests(
   cwd: string,
+  options: TypedTestOptions,
   logger: Logger,
   outputDirectory: string,
-  browser: Browsers,
-  keepAlive: boolean,
   port: number,
 ) {
-  return async (resolve: (stats: StatsAndResults) => void) => {
+  const { keepAlive } = options
+
+  return (resolve: (stats: StatsAndResults) => void) => {
     let server: ReturnType<typeof createServer>
     let dispose: () => void
     const app = setupServer(logger, outputDirectory, (results, stats) => {
@@ -46,7 +47,7 @@ function runTests(
         server.close()
       }
 
-      if (dispose) {
+      if (!keepAlive && dispose) {
         dispose()
       }
 
@@ -56,19 +57,19 @@ function runTests(
     server = createServer(app)
 
     server.listen(port, '0.0.0.0', () =>
-      listen(cwd, logger, browser, keepAlive, port, d => (dispose = d)),
+      openTestBrowser(cwd, logger, options, port, d => (dispose = d)),
     )
   }
 }
 
-async function listen(
+async function openTestBrowser(
   cwd: string,
   logger: Logger,
-  browser: Browsers,
-  keepAlive: boolean,
+  options: TypedTestOptions,
   port: number,
   setDispose: (dispose: () => void) => void,
 ) {
+  const { browser, keepAlive } = options
   const url = `http://localhost:${port}`
 
   if (browser !== 'chrome-headless') {

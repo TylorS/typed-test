@@ -48,7 +48,11 @@ export class TestRunner {
     this.options = options
     this.results = previousResults || new Results()
 
-    this.run = options.mode === 'node' ? runNodeTests : runBrowserTests
+    if (options.mode === 'node') {
+      this.run = runNodeTests
+    } else {
+      this.run = runBrowserTests
+    }
   }
 
   public runTests = async (

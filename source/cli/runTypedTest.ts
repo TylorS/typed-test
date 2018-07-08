@@ -5,6 +5,7 @@ import { findTypedTestConfig } from './findTypedTestConfig'
 import { logResults, logTypeCheckResults } from './log'
 import { TestRunner } from './TestRunner'
 import { Options } from './types'
+import { watchBrowserTests } from './watchBrowserTests'
 
 const EXCLUDE = ['./node_modules/**']
 
@@ -14,11 +15,25 @@ export async function runTypedTest(userOptions?: Options) {
   const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
   const typedTestConfig = findTypedTestConfig(compilerOptions, cwd)
   const {
-    options: { mode, watch },
+    options,
     results: { removeFilePath },
     runTests,
     logger,
   } = new TestRunner({ ...typedTestConfig, ...userOptions }, null, cwd)
+  const { mode, watch } = options
+
+  if (mode == 'browser' && watch) {
+    return watchBrowserTests(
+      fileGlobs,
+      compilerOptions,
+      options,
+      cwd,
+      logger,
+      ({ results }) => logResults(logger, results),
+      console.error,
+      results => logTypeCheckResults(logger, results),
+    )
+  }
 
   return watchTestMetadata(
     cwd,

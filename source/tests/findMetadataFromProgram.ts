@@ -4,13 +4,14 @@ import { TestMetadata } from '../types'
 import { findNode } from '../typescript/findNode'
 import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
 import { parseTestMetadata } from './parseTestMetadata'
+import { makeAbsolute } from '../common/makeAbsolute'
 
 export async function findMetadataFromProgram(
   sourcePaths: ReadonlyArray<string>,
   program: ts.Program,
 ): Promise<TestMetadata[]> {
   const { currentDirectory, typeChecker, sourceFiles } = programData(program)
-  const absoluteSourcePaths = sourcePaths.map(x => (isAbsolute(x) ? x : join(currentDirectory, x)))
+  const absoluteSourcePaths = sourcePaths.map(x => makeAbsolute(currentDirectory, x))
   const typedTestInterface = await findNode(isTypedTestTestInterface(typeChecker), sourceFiles)
   const typedTestSymbol = typeChecker.getTypeAtLocation(typedTestInterface).getSymbol() as ts.Symbol
   const userSourceFiles = sourceFiles.filter(
@@ -22,7 +23,7 @@ export async function findMetadataFromProgram(
 
   return parseTestMetadata(userSourceFiles, typedTestSymbol, typeChecker).map(m => ({
     ...m,
-    filePath: isAbsolute(m.filePath) ? m.filePath : join(currentDirectory, m.filePath),
+    filePath: makeAbsolute(currentDirectory, m.filePath),
   }))
 }
 
