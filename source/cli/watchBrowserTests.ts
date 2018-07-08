@@ -24,12 +24,6 @@ const isEqual: (a: any, b: any) => boolean = require('lodash.isequal')
 const uniq = <A>(list: Array<A>): Array<A> => Array.from(new Set(list))
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
-declare module 'webpack' {
-  export interface Stats {
-    hash: string
-  }
-}
-
 const updateQueue = (metadata: TestMetadata[], queue: TestMetadata[]) => {
   const queuedMetadataByFilePath = collectByKey(x => x.filePath, queue)
   const queuedFilePaths = Object.keys(queuedMetadataByFilePath).sort()
@@ -131,10 +125,11 @@ export async function watchBrowserTests(
   const runTestsInBrowser = setupTestBrowser()
 
   const newStats = async (stats: Stats) => {
-    const shouldReturnEarly = stats.hash === previousHash || !newFileOnDisk || testsAreRunning
+    const shouldReturnEarly =
+      (stats as any).hash === previousHash || !newFileOnDisk || testsAreRunning
 
     if (shouldReturnEarly) {
-      previousHash = stats.hash
+      previousHash = (stats as any).hash
 
       return
     }
