@@ -20,11 +20,11 @@ export async function runTypedTest(userOptions?: Options) {
     runTests,
     logger,
   } = new TestRunner({ ...typedTestConfig, ...userOptions }, null, cwd)
-  const { mode, watch } = options
+  const { mode, watch, files: userFiles } = options
 
   if (mode == 'browser' && watch) {
     return watchBrowserTests(
-      fileGlobs,
+      userFiles.length > 0 ? userFiles : fileGlobs,
       compilerOptions,
       options,
       cwd,
@@ -37,7 +37,7 @@ export async function runTypedTest(userOptions?: Options) {
 
   return watchTestMetadata(
     cwd,
-    fileGlobs,
+    userFiles.length > 0 ? userFiles : fileGlobs,
     compilerOptions,
     mode,
     logger,

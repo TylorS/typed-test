@@ -4,7 +4,7 @@ import * as yargs from 'yargs'
 import { runTypedTest } from './runTypedTest'
 import { TypedTestOptions } from './types'
 
-const options = yargs
+const cliOptions = yargs
   .options({
     mode: {
       choices: ['node', 'browser'],
@@ -39,6 +39,8 @@ const options = yargs
       group: 'Typed Test',
     },
   })
-  .help().argv as Partial<TypedTestOptions>
+  .help().argv as Partial<TypedTestOptions> & { _: Array<string> }
+
+const options = { ...cliOptions, files: cliOptions._ }
 
 runTypedTest(options)

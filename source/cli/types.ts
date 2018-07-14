@@ -4,6 +4,7 @@ import { JsonResults } from '../types'
 
 export type TypedTestOptions = {
   mode: 'node' | 'browser'
+  files: Array<string>
   timeout: number
   browser: Browsers
   keepAlive: boolean

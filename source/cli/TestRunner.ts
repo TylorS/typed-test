@@ -7,6 +7,7 @@ import { StatsAndResults, TypedTestOptions } from './types'
 
 const defaultOptions: TypedTestOptions = {
   mode: 'node',
+  files: [],
   timeout: 2000,
   browser: 'chrome-headless',
   keepAlive: false,
