@@ -159,7 +159,7 @@ export async function watchBrowserTests(
     writingToDisk = false
 
     if (firstRun) {
-      watchFile(cwd, temporaryPath, bundlePath, newStats, errCb)
+      watchFile(cwd, temporaryPath, bundlePath, options.webpackConfiguration, newStats, errCb)
     }
   }
 

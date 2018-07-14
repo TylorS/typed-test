@@ -4,6 +4,7 @@ import { Logger, TestMetadata } from '../types'
 import { createIndexHtml } from './createIndexHtml'
 import { generateTestBundle } from './generateTestBundle'
 import { bundleFileOrExit } from './webpack'
+import { Configuration } from 'webpack'
 
 export async function setupBrowser(
   cwd: string,
@@ -11,6 +12,7 @@ export async function setupBrowser(
   timeout: number,
   logger: Logger,
   testMetadata: TestMetadata[],
+  extendConfiguration: (config: Configuration) => Configuration,
 ) {
   const outputDirectory = tempy.directory()
   const temporaryPath = join(outputDirectory, basename(tempy.file({ extension: 'ts' })))
@@ -20,7 +22,7 @@ export async function setupBrowser(
   const { writeFileSync } = require('fs')
 
   writeFileSync(temporaryPath, browserApiFile)
-  await bundleFileOrExit(cwd, temporaryPath, bundlePath, logger)
+  await bundleFileOrExit(cwd, temporaryPath, bundlePath, logger, extendConfiguration)
   writeFileSync(indexHtmlPath, createIndexHtml(basename(bundlePath)))
 
   return { outputDirectory, bundlePath, indexHtmlPath }

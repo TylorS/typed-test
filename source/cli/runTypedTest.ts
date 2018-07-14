@@ -38,8 +38,6 @@ export async function runTypedTest(userOptions?: Options): Promise<Array<{ dispo
     const stats = getTestStats(getTestResults(results.getResults()))
     const exitCode = stats.failing > 0 ? 1 : 0
 
-    console.log('Exit', exitCode)
-
     process.exit(exitCode)
   }
 

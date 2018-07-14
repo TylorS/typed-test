@@ -13,6 +13,7 @@ const defaultOptions: TypedTestOptions = {
   keepAlive: false,
   typeCheck: false,
   watch: false,
+  webpackConfiguration: x => x,
 }
 
 const defaultLogger: Logger = {

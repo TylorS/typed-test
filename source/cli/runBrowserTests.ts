@@ -6,6 +6,7 @@ import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { Logger, TestMetadata } from '../types'
 import { StatsAndResults, TypedTestOptions } from './types'
+import { Configuration } from 'webpack'
 
 export async function runBrowserTests(
   options: TypedTestOptions,
@@ -13,18 +14,37 @@ export async function runBrowserTests(
   logger: Logger,
   testMetadata: TestMetadata[],
 ): Promise<StatsAndResults> {
-  const { timeout } = options
-  const { port, outputDirectory } = await setup(logger, cwd, timeout, testMetadata)
+  const { timeout, webpackConfiguration } = options
+  const { port, outputDirectory } = await setup(
+    logger,
+    cwd,
+    timeout,
+    testMetadata,
+    webpackConfiguration,
+  )
 
   return new Promise<StatsAndResults>(runTests(cwd, options, logger, outputDirectory, port)).catch(
     () => runBrowserTests(options, cwd, logger, testMetadata),
   )
 }
 
-async function setup(logger: Logger, cwd: string, timeout: number, testMetadata: TestMetadata[]) {
+async function setup(
+  logger: Logger,
+  cwd: string,
+  timeout: number,
+  testMetadata: TestMetadata[],
+  webpackConfiguration: (config: Configuration) => Configuration,
+) {
   await logger.log('Bundling tests...')
   const port = await findOpenPort()
-  const { outputDirectory } = await setupBrowser(cwd, port, timeout, logger, testMetadata)
+  const { outputDirectory } = await setupBrowser(
+    cwd,
+    port,
+    timeout,
+    logger,
+    testMetadata,
+    webpackConfiguration,
+  )
   await logger.log('Spinning up server...')
 
   return { port, outputDirectory }
