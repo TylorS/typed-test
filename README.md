@@ -2,6 +2,8 @@
 
 Testing that works for you.
 
+![Typed Test VSCode](./docs/typed-test-vscode.gif)
+
 Typed Test is a test runner that leverages TypeScript's knowledge of your code,
 to provide zero-configuration for the most common scenario - Running your tests 
 from within a Node.js environment. Need more? Read on, we've got you covered!
