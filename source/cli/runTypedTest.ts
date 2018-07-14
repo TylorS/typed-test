@@ -9,6 +9,7 @@ import { watchBrowserTests } from './watchBrowserTests'
 import { CompilerOptions } from 'typescript'
 import { findTestMetadata } from '../tests/findTestMetadata'
 import { Results } from './Results'
+import { getTestResults, getTestStats } from '../results'
 
 const EXCLUDE = ['./node_modules/**']
 
@@ -22,28 +23,44 @@ export async function runTypedTest(userOptions?: Options): Promise<Array<{ dispo
 
   const disposables = await Promise.all(
     typedTestConfigs.map(typedTestConfig =>
-      run(typedTestConfig, userOptions, cwd, fileGlobs, compilerOptions, hasWatch, results),
+      run(
+        { ...typedTestConfig, ...userOptions },
+        cwd,
+        fileGlobs,
+        compilerOptions,
+        results,
+        hasWatch,
+      ),
     ),
   )
+
+  if (!hasWatch) {
+    const stats = getTestStats(getTestResults(results.getResults()))
+    const exitCode = stats.failing > 0 ? 1 : 0
+
+    console.log('Exit', exitCode)
+
+    process.exit(exitCode)
+  }
 
   return disposables
 }
 
 async function run(
-  typedTestConfig: Options,
-  userOptions: Options | undefined,
+  userOptions: Options,
   cwd: string,
   fileGlobs: string[],
   compilerOptions: CompilerOptions,
-  hasWatch: boolean,
-  results: Results,
+  globalResults: Results,
+  useGlobalResults: boolean,
 ): Promise<{ dispose: () => void }> {
   const {
     options,
     results: { removeFilePath },
     runTests,
     logger,
-  } = new TestRunner({ ...typedTestConfig, ...userOptions }, results, cwd)
+  } = new TestRunner(userOptions, useGlobalResults ? globalResults : null, cwd)
+  const { updateResults } = globalResults
   const { mode, watch, files: userFiles } = options
   const fileGlobsToUse = userFiles.length > 0 ? userFiles : fileGlobs
 
@@ -54,24 +71,23 @@ async function run(
       options,
       cwd,
       logger,
-      ({ results }) => logResults(logger, results),
+      ({ results }) => {
+        updateResults(results)
+
+        logResults(logger, results)
+      },
       console.error,
       results => logTypeCheckResults(logger, results),
     )
   }
 
   const handleMetadata = async (metadata: TestMetadata[]) => {
-    const [{ stats, results }, processResults] = await runTests(metadata)
+    const [{ results }, processResults] = await runTests(metadata)
+
+    updateResults(results)
 
     logTypeCheckResults(logger, processResults)
     logResults(logger, results)
-
-    if (!hasWatch) {
-      const exitCode =
-        processResults.exitCode > 0 ? processResults.exitCode : stats.failing > 0 ? 1 : 0
-
-      process.exit(exitCode)
-    }
   }
 
   if (watch) {
@@ -87,7 +103,7 @@ async function run(
   }
 
   const metadata = await findTestMetadata(cwd, fileGlobsToUse, compilerOptions, mode)
-  handleMetadata(metadata)
+  await handleMetadata(metadata)
 
   return { dispose: () => {} }
 }

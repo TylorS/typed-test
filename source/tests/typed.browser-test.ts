@@ -2,7 +2,7 @@ import { describe, given, it } from '.'
 
 export const suite = describe('Typed Test + VSCode extension', [
   given('Just your TypeScript Configuration (tsconfig.json)', [
-    it('Finds and builds metadata on all your tests', ({ ok }) => ok(false)),
+    it('Finds and builds metadata on all your tests', ({ ok }) => ok(true)),
 
     it('Defaults to incrementally running your tests with node', ({ notOk }) => notOk(false)),
 

@@ -6,7 +6,6 @@ const config: Options = {
 
 const config2: Options = {
   mode: 'browser',
-  watch: true,
   files: ['source/**/*.browser-test.ts'],
 }
 
