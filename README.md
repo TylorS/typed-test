@@ -114,6 +114,9 @@ can be useful for debugging errors from a browser's given DevTools.
 
 For more advanced configurations, and for sharing configuration with our Editor extensions, it is possible to specify a `.typed-test.ts` configuration file which allows more flexibility and options. The configuration file is to be written in TypeScript, to allow type-checking of the configuration itself.
 
+When running from the CLI, any CLI flags will override the corresponding options 
+found in your configurations.
+
 ```typescript
 import { Options } from '@typed/test'
 
@@ -187,4 +190,25 @@ const config: Options = {
   webpackConfigurations = (defaultConfig: WebpackConfig): WebpackConfig => 
     webpackMerge(defaultConfig, require('./path/to/my-webpack-config.js'))
 }
+```
+
+### Multiple Configurations
+
+Want to run your tests from multiple browsers, or some tests within node and 
+the rest in a browser? Multiple configurations has got you covered.
+
+```typescript
+import { Options } from '@typed/test'
+
+const nodeConfig: Options = {
+  files: ['source/**/*.test.ts']
+}
+
+const browserConfig: Options = {
+  files: ['source/**/*.test.ts'],
+  mode: 'browser',
+}
+
+// Just return an array to use multiple configurations
+export default [ nodeConfig, browserConfig ]
 ```
