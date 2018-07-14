@@ -56,7 +56,6 @@ export async function watchBrowserTests(
   const bundlePath = join(outputDirectory, basename(tempy.file({ extension: 'js' })))
   const indexHtmlPath = join(outputDirectory, 'index.html')
   const port = await findOpenPort()
-  const launcher = await getLauncher()
   const url = `http://localhost:${port}`
   const logErrors = (errors: string[]) => Promise.all(errors.map(logger.error))
   const makeAbsolutePath = (path: string) => (isAbsolute(path) ? path : join(cwd, path))
@@ -70,29 +69,35 @@ export async function watchBrowserTests(
   let scheduleNextRunHandle: NodeJS.Timer
   let newFileOnDisk = false
   let killBrowser: () => void = () => void 0
-  let previousHash: string = ''
+  let previousWebpackHash: string = ''
   let firstRun = true
   let timeToRunTests: number = 0
-  let browserOpen: number = 0
-  let testsComplete: number = 0
+  let browserOpenTime: number = 0
+  let testsCompletedTime: number = 0
 
   const killTestBrowser = () => (!keepAlive && killBrowser ? killBrowser() : void 0)
 
-  const setupTestBrowser = () => {
+  const setupTestBrowser = async () => {
     const { browser, keepAlive } = options
 
     if (browser !== 'chrome-headless') {
+      const launcher = await getLauncher()
+
       const run = async () => {
         killTestBrowser()
 
         logger.log('Opening browser...')
-        browserOpen = Date.now()
+        browserOpenTime = Date.now()
 
         const instance = await openBrowser(browser, url, keepAlive, launcher)
 
         if (!firstRun) {
-          const lastCompletion = testsComplete
-          delay(timeToRunTests * 3).then(() => (testsComplete === lastCompletion ? run() : void 0))
+          const lastCompletion = testsCompletedTime
+          // Re-run tests if they seem to have stalled - this can happen when browsers are opened in succession quite quickly
+          // I've only been able to make it do this when I am very rapidly changing and saving a test file to purposely try and break things.
+          delay(timeToRunTests * 3).then(
+            () => (testsCompletedTime === lastCompletion ? run() : void 0),
+          )
         }
 
         killBrowser = () => instance.stop()
@@ -107,13 +112,15 @@ export async function watchBrowserTests(
       killTestBrowser()
 
       logger.log('Opening browser...')
-      browserOpen = Date.now()
+      browserOpenTime = Date.now()
 
       const chrome = await launch({ startingUrl: url })
 
       if (!firstRun) {
-        const lastCompletion = testsComplete
-        delay(timeToRunTests * 3).then(() => (testsComplete === lastCompletion ? run() : void 0))
+        const lastCompletion = testsCompletedTime
+        delay(timeToRunTests * 3).then(
+          () => (testsCompletedTime === lastCompletion ? run() : void 0),
+        )
       }
 
       killBrowser = () => chrome.kill()
@@ -122,14 +129,14 @@ export async function watchBrowserTests(
     return run
   }
 
-  const runTestsInBrowser = setupTestBrowser()
+  const runTestsInBrowser = await setupTestBrowser()
 
   const newStats = async (stats: Stats) => {
     const shouldReturnEarly =
-      (stats as any).hash === previousHash || !newFileOnDisk || testsAreRunning
+      (stats as any).hash === previousWebpackHash || !newFileOnDisk || testsAreRunning
 
     if (shouldReturnEarly) {
-      previousHash = (stats as any).hash
+      previousWebpackHash = (stats as any).hash
 
       return
     }
@@ -215,10 +222,10 @@ export async function watchBrowserTests(
       const results = updateResults(newResults)
       const stats = getTestStats(getTestResults(results))
 
-      cb({ results: updateResults(results), stats })
+      cb({ results, stats })
 
-      testsComplete = Date.now()
-      timeToRunTests = testsComplete - browserOpen
+      testsCompletedTime = Date.now()
+      timeToRunTests = testsCompletedTime - browserOpenTime
       newFileOnDisk = testsAreRunning = false
     }),
   )
