@@ -10,7 +10,12 @@ export function bundleFileOrExit(
   logger: Logger,
   extendConfiguration: (config: Webpack.Configuration) => Webpack.Configuration,
 ): Promise<void> {
-  const compiler = Webpack(extendConfiguration(defaultWebpackConfig(cwd, input, output)))
+  const defaultConfig = defaultWebpackConfig(cwd, input, output)
+  const extendedConfiguration = { ...extendConfiguration(defaultConfig) }
+  extendedConfiguration.entry = defaultConfig.entry
+  extendedConfiguration.output = defaultConfig.output
+
+  const compiler = Webpack(extendedConfiguration)
   const logError = logErrors(logger)
 
   return new Promise<void>((resolve, reject) =>

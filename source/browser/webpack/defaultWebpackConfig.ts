@@ -1,7 +1,7 @@
 import { existsSync } from 'fs'
 import { basename, dirname } from 'path'
 import { sync } from 'resolve'
-import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin/lib'
+import { TsconfigPathsPlugin } from 'tsconfig-paths-webpack-plugin'
 import { findConfigFile } from 'typescript'
 import { Configuration } from 'webpack'
 

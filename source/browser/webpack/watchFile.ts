@@ -9,7 +9,12 @@ export function watchFile(
   cb: (stats: Webpack.Stats) => void,
   error: (error: Error) => void,
 ) {
-  const compiler = Webpack(extendConfiguration(defaultWebpackConfig(cwd, input, output)))
+  const defaultConfig = defaultWebpackConfig(cwd, input, output)
+  const extendedConfiguration = { ...extendConfiguration(defaultConfig) }
+  extendedConfiguration.entry = defaultConfig.entry
+  extendedConfiguration.output = defaultConfig.output
+
+  const compiler = Webpack(extendedConfiguration)
 
   compiler.watch({ aggregateTimeout: 600 }, (err, stats) => {
     if (err) {
