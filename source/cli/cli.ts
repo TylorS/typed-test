@@ -41,6 +41,10 @@ const cliOptions = yargs
   })
   .help().argv as Partial<TypedTestOptions> & { _: Array<string> }
 
-const options = { ...cliOptions, files: cliOptions._ }
+const options = { ...cliOptions }
+
+if (cliOptions._.length > 0) {
+  options.files = cliOptions._
+}
 
 runTypedTest(options)

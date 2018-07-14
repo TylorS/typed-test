@@ -12,7 +12,7 @@ import { generateTestBundle } from '../browser/generateTestBundle'
 import { createIndexHtml } from '../browser/createIndexHtml'
 import { ProcessResults, typecheckInAnotherProcess } from '../typescript/typeCheckInAnotherProcess'
 import { watchTestMetadata } from '../tests/watchTestMetadata'
-import { CompilerOptions } from '../../node_modules/typescript'
+import { CompilerOptions } from 'typescript'
 import { watchFile } from '../browser/webpack/watchFile'
 import { collectByKey } from '../common/collectByKey'
 import { Stats } from 'webpack'
@@ -233,7 +233,7 @@ export async function watchBrowserTests(
   writeFileSync(indexHtmlPath, createIndexHtml(basename(bundlePath)))
   server.listen(port, '0.0.0.0')
 
-  const { close: stopWatchingMetadata } = await watchTestMetadata(
+  const { dispose: stopWatchingMetadata } = await watchTestMetadata(
     cwd,
     fileGlobs,
     compilerOptions,

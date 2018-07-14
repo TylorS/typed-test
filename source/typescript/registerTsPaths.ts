@@ -1,4 +1,4 @@
-import { createMatchPath } from 'tsconfig-paths'
+import { createMatchPath } from 'tsconfig-paths/lib'
 import { CompilerOptions } from 'typescript'
 
 export function registerTsPaths(options: CompilerOptions): CompilerOptions {

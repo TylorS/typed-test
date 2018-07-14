@@ -23,7 +23,7 @@ export function watchTestMetadata(
   logger: Logger,
   removeFile: (filePath: string) => void,
   cb: (metadata: TestMetadata[]) => void,
-): Promise<{ close: () => void }> {
+): Promise<{ dispose: () => void }> {
   if (mode === 'node') {
     registerTsPaths(compilerOptions)
     transpileNode(cwd, compilerOptions)
@@ -40,7 +40,7 @@ async function watchMetadata(
   logger: Logger,
   cb: (metadata: TestMetadata[]) => void,
   removeFile: (filePath: string) => void,
-) {
+): Promise<{ dispose: () => void }> {
   const files: ts.MapLike<{ version: number }> = {}
   const filePaths = getScriptFileNames(cwd, fileGlobs).map(x => makeAbsolute(cwd, x))
 
@@ -108,7 +108,7 @@ async function watchMetadata(
         removeFile(absolutePath)
       })
 
-      return watcher
+      return { dispose: () => watcher.close() }
     })
 }
 

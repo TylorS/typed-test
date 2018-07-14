@@ -3,10 +3,10 @@ import { CompilerOptions, findConfigFile } from 'typescript'
 import { transpileFile } from '../typescript/transpileFile'
 import { Options } from './types'
 
-export function findTypedTestConfig(
+export function findTypedTestConfigs(
   compilerOptions: CompilerOptions,
   cwd: string = process.cwd(),
-): Options {
+): Options[] {
   const configPath = findConfigFile(
     cwd,
     (fileName: string) => fs.existsSync(fileName),
@@ -14,7 +14,7 @@ export function findTypedTestConfig(
   )
 
   if (!configPath) {
-    return {}
+    return [{}]
   }
 
   const configContents = fs.readFileSync(configPath).toString()
@@ -22,5 +22,9 @@ export function findTypedTestConfig(
   // tslint:disable-next-line:no-eval
   const configModule = eval(content)
 
-  return configModule.default ? configModule.default : configModule
+  return configModule.default ? toArrayIfNot(configModule.default) : toArrayIfNot(configModule)
+}
+
+function toArrayIfNot<A>(x: A | Array<A>): Array<A> {
+  return Array.isArray(x) ? x : [x]
 }
