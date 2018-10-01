@@ -8,6 +8,7 @@ import {
   isVariableDeclarationList,
   isVariableStatement,
   Node,
+  Signature,
   SourceFile,
   Symbol,
   SyntaxKind,
@@ -237,9 +238,9 @@ function tryGetTypes(node: Node, typeChecker: TypeChecker): Type[] | undefined {
     }
 
     if (isCallLikeExpression(node)) {
-      const returnType = typeChecker.getReturnTypeOfSignature(
-        typeChecker.getResolvedSignature(node),
-      )
+      const returnType = typeChecker.getReturnTypeOfSignature(typeChecker.getResolvedSignature(
+        node,
+      ) as Signature)
 
       types.push(returnType)
     }

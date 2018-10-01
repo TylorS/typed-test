@@ -3,14 +3,14 @@ import { relative } from 'path'
 import * as ts from 'typescript'
 import { CompilerOptions } from 'typescript'
 import { getScriptFileNames } from '../cli/getScriptFileNames'
+import { makeAbsolute } from '../common/makeAbsolute'
 import { Logger, TestMetadata } from '../types'
 import { createLanguageService } from '../typescript/createLanguageService'
+import { findNode } from '../typescript/findNode'
+import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
 import { registerTsPaths } from '../typescript/registerTsPaths'
 import { transpileNode } from '../typescript/transpileNode'
 import { findMetadataFromProgram } from './findMetadataFromProgram'
-import { makeAbsolute } from '../common/makeAbsolute'
-import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
-import { findNode } from '../typescript/findNode'
 import { parseTestMetadata } from './parseTestMetadata'
 // tslint:disable-next-line:no-var-requires
 const watch = require('glob-watcher')
@@ -49,7 +49,7 @@ async function watchMetadata(
   })
 
   const services = createLanguageService(cwd, fileGlobs, compilerOptions, files)
-  const program = services.getProgram()
+  const program = services.getProgram() as ts.Program
   const typeChecker = program.getTypeChecker()
   const typedTestInterface = await findNode(
     isTypedTestTestInterface(typeChecker),
@@ -66,12 +66,14 @@ async function watchMetadata(
       files[filePath].version++
     }
 
-    const program = services.getProgram() // required - side-effectful
+    const program = services.getProgram() as ts.Program // required - side-effectful
     const userSourceFiles = program
       .getSourceFiles()
       .filter(x => makeAbsolute(cwd, x.fileName) === filePath)
 
-    if (userSourceFiles.length === 0) return
+    if (userSourceFiles.length === 0) {
+      return
+    }
 
     logger.log('Updating ' + relative(cwd, filePath))
 
@@ -87,7 +89,7 @@ async function watchMetadata(
 
   await logger.log('Finding metadata...')
 
-  return findMetadataFromProgram(filePaths, services.getProgram())
+  return findMetadataFromProgram(filePaths, services.getProgram() as ts.Program)
     .then(cb)
     .then(() => {
       watcher.on('change', (filePath: string) => updateFile(makeAbsolute(cwd, filePath), false))

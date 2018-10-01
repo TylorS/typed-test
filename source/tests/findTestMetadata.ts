@@ -1,5 +1,5 @@
 import * as clear from 'clear-require'
-import { CompilerOptions } from 'typescript'
+import { CompilerOptions, Program } from 'typescript'
 import { getScriptFileNames } from '../cli/getScriptFileNames'
 import { TestMetadata } from '../types'
 import { createLanguageService } from '../typescript/createLanguageService'
@@ -21,7 +21,7 @@ export async function findTestMetadata(
 
   const services = createLanguageService(cwd, fileGlobs, compilerOptions, {})
   const filePaths = getScriptFileNames(cwd, fileGlobs)
-  const program = services.getProgram()
+  const program = services.getProgram() as Program
   const metadata = await findMetadataFromProgram(filePaths, program)
 
   return metadata
