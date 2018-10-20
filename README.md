@@ -11,9 +11,11 @@ from within a Node.js environment. Need more? Read on, we've got you covered!
 ## Get it 
 
 ```sh
-npm install --save-dev @typed/test
+## typescript ^3.1.3 is a peerDependency
+
+npm install --save-dev @typed/test typescript
 # or 
-yarn add --dev @typed/test
+yarn add --dev @typed/test typescript
 ```
 
 ## A Brief Example 
