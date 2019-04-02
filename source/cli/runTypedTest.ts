@@ -1,21 +1,24 @@
+import { CompilerOptions, ModuleKind } from 'typescript'
+import { getTestResults, getTestStats } from '../results'
+import { findTestMetadata } from '../tests/findTestMetadata'
 import { watchTestMetadata } from '../tests/watchTestMetadata'
 import { TestMetadata } from '../types'
 import { findTsConfig } from '../typescript/findTsConfig'
 import { findTypedTestConfigs } from './findTypedTestConfigs'
 import { logResults, logTypeCheckResults } from './log'
+import { Results } from './Results'
 import { TestRunner } from './TestRunner'
 import { Options } from './types'
 import { watchBrowserTests } from './watchBrowserTests'
-import { CompilerOptions } from 'typescript'
-import { findTestMetadata } from '../tests/findTestMetadata'
-import { Results } from './Results'
-import { getTestResults, getTestStats } from '../results'
 
 const EXCLUDE = ['./node_modules/**']
 
 export async function runTypedTest(userOptions?: Options): Promise<Array<{ dispose: () => void }>> {
   const cwd = process.cwd()
   const { compilerOptions, files = [], include = [], exclude = EXCLUDE } = findTsConfig(cwd)
+
+  compilerOptions.module = ModuleKind.CommonJS
+
   const fileGlobs = [...files, ...include, ...exclude.map(x => `!${x}`)]
   const typedTestConfigs = findTypedTestConfigs(compilerOptions, cwd)
   const results = new Results()
@@ -62,7 +65,7 @@ async function run(
   const { mode, watch, files: userFiles } = options
   const fileGlobsToUse = userFiles.length > 0 ? userFiles : fileGlobs
 
-  if (mode == 'browser' && watch) {
+  if (mode === 'browser' && watch) {
     return watchBrowserTests(
       fileGlobsToUse,
       compilerOptions,
@@ -103,5 +106,6 @@ async function run(
   const metadata = await findTestMetadata(cwd, fileGlobsToUse, compilerOptions, mode)
   await handleMetadata(metadata)
 
+  // tslint:disable-next-line:no-empty
   return { dispose: () => {} }
 }
