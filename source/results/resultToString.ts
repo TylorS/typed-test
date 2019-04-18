@@ -78,9 +78,16 @@ function formatFailingResult(
   nested: boolean,
 ): string {
   const resultName = `${red(cross)} ${testName(name)} - ${filePath}`
-  const resultError = errorToString(error)
 
-  return newLineWhenNotNested(resultName + moveIn(`\n` + resultError), nested)
+  try {
+    const resultError = errorToString(error)
+
+    return newLineWhenNotNested(resultName + moveIn(`\n` + resultError), nested)
+  } catch {
+    const errorMessage = error.stack ? error.stack : error.message
+
+    return newLineWhenNotNested(resultName + moveIn(`\n` + errorMessage), nested)
+  }
 }
 
 function formatSkippedResult({ name }: TestResult, nested: boolean): string {
