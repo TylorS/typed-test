@@ -35,7 +35,7 @@ export function findTsConfig(cwd: string = process.cwd()): TsConfig {
       return mergeConfigs(baseConfig, extendedConfigs[0])
     }
 
-    return extendedConfigs.reduceRight(mergeConfigs)
+    return extendedConfigs.reduceRight(mergeConfigs, baseConfig)
   }
 
   return baseConfig
