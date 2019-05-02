@@ -39,7 +39,7 @@ const cliOptions = yargs
       group: 'Typed Test',
     },
   })
-  .help().argv as Partial<TypedTestOptions> & { _: Array<string> }
+  .help().argv as Partial<TypedTestOptions> & { _: string[] }
 
 const options = { ...cliOptions }
 
