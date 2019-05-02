@@ -62,5 +62,5 @@ function parseConfigFile(cwd: string, filePath: string): TsConfig {
     throw new Error(errors.map(x => diagnosticToString(x, cwd)).join('\n'))
   }
 
-  return { ...config, compilerOptions: options, configFilePath: filePath }
+  return { ...config, compilerOptions: options, configPath: filePath }
 }
