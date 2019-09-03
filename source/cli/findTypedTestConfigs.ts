@@ -18,13 +18,13 @@ export function findTypedTestConfigs(
   }
 
   const configContents = fs.readFileSync(configPath).toString()
-  const { content } = transpileFile(configContents, compilerOptions, cwd)
+  const { content } = transpileFile(configContents, compilerOptions, cwd, configPath)
   // tslint:disable-next-line:no-eval
   const configModule = eval(content)
 
   return configModule.default ? toArrayIfNot(configModule.default) : toArrayIfNot(configModule)
 }
 
-function toArrayIfNot<A>(x: A | Array<A>): Array<A> {
+function toArrayIfNot<A>(x: A | A[]): A[] {
   return Array.isArray(x) ? x : [x]
 }

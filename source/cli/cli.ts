@@ -47,4 +47,8 @@ if (cliOptions._.length > 0) {
   options.files = cliOptions._
 }
 
-runTypedTest(options)
+runTypedTest(options).catch(error => {
+  console.error(error)
+
+  process.exit(1)
+})
