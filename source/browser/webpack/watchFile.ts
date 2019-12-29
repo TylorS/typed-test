@@ -1,4 +1,4 @@
-import * as Webpack from 'webpack'
+import Webpack from 'webpack'
 import { defaultWebpackConfig } from './defaultWebpackConfig'
 
 export function watchFile(

@@ -19,8 +19,8 @@ function runInAnotherProcess(filePath: string, args: string[]): Promise<ProcessR
     const errors: string[] = []
     const subprocess = fork(filePath, args, { stdio: ['pipe', 'pipe', 'pipe', 'ipc'] })
 
-    subprocess.stdout.on('data', msg => messages.push(msg.toString()))
-    subprocess.stderr.on('data', msg => errors.push(msg.toString()))
+    subprocess.stdout!.on('data', msg => messages.push(msg.toString()))
+    subprocess.stderr!.on('data', msg => errors.push(msg.toString()))
 
     subprocess.on('close', exitCode =>
       resolve({ exitCode, stdout: messages.join(''), stderr: errors.join('') }),

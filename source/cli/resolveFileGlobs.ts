@@ -1,4 +1,4 @@
-import * as glob from 'glob'
+import glob from 'glob'
 
 export function resolveFileGlobs(globs: string[]): Promise<string[]> {
   return Promise.all(globs.map(resolveFileGlob)).then(xss =>

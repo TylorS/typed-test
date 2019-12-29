@@ -1,4 +1,4 @@
-import * as fs from 'fs'
+import fs from 'fs'
 import { basename, dirname, join } from 'path'
 import {
   CompilerOptions,

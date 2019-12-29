@@ -1,9 +1,9 @@
 import { writeFileSync } from 'fs'
 import { createServer } from 'http'
-import isEqual = require('lodash.isequal')
+import isEqual from 'lodash.isequal'
 import { basename, isAbsolute, join } from 'path'
 import { sync } from 'resolve'
-import * as tempy from 'tempy'
+import tempy from 'tempy'
 import { CompilerOptions } from 'typescript'
 import { Stats } from 'webpack'
 import { createIndexHtml } from '../browser/createIndexHtml'

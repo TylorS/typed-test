@@ -1,10 +1,10 @@
 import { basename, join } from 'path'
-import * as tempy from 'tempy'
+import tempy from 'tempy'
+import { Configuration } from 'webpack'
 import { Logger, TestMetadata } from '../types'
 import { createIndexHtml } from './createIndexHtml'
 import { generateTestBundle } from './generateTestBundle'
 import { bundleFileOrExit } from './webpack'
-import { Configuration } from 'webpack'
 
 export async function setupBrowser(
   cwd: string,

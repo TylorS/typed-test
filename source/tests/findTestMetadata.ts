@@ -1,4 +1,4 @@
-import * as clear from 'clear-require'
+import clear from 'clear-require'
 import { CompilerOptions, Program } from 'typescript'
 import { getScriptFileNames } from '../cli/getScriptFileNames'
 import { TestMetadata } from '../types'

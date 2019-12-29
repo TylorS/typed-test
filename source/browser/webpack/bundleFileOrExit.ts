@@ -1,4 +1,4 @@
-import * as Webpack from 'webpack'
+import Webpack from 'webpack'
 import { Logger } from '../../types'
 import { defaultWebpackConfig } from './defaultWebpackConfig'
 import { logErrors } from './logErrors'

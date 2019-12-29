@@ -1,10 +1,10 @@
 import { isAbsolute, join } from 'path'
-import * as ts from 'typescript'
+import ts from 'typescript'
+import { makeAbsolute } from '../common/makeAbsolute'
 import { TestMetadata } from '../types'
 import { findNode } from '../typescript/findNode'
 import { isTypedTestTestInterface } from '../typescript/isTypedTestTestInterface'
 import { parseTestMetadata } from './parseTestMetadata'
-import { makeAbsolute } from '../common/makeAbsolute'
 
 export async function findMetadataFromProgram(
   sourcePaths: ReadonlyArray<string>,
