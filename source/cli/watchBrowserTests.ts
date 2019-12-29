@@ -1,27 +1,27 @@
+import { writeFileSync } from 'fs'
 import { createServer } from 'http'
+import isEqual = require('lodash.isequal')
+import { basename, isAbsolute, join } from 'path'
 import { sync } from 'resolve'
+import * as tempy from 'tempy'
+import { CompilerOptions } from 'typescript'
+import { Stats } from 'webpack'
+import { createIndexHtml } from '../browser/createIndexHtml'
 import { findOpenPort } from '../browser/findOpenPort'
+import { generateTestBundle } from '../browser/generateTestBundle'
 import { getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
-import { Logger, TestMetadata } from '../types'
-import { StatsAndResults, TypedTestOptions } from './types'
-import { basename, join, isAbsolute } from 'path'
-import * as tempy from 'tempy'
-import { writeFileSync } from 'fs'
-import { generateTestBundle } from '../browser/generateTestBundle'
-import { createIndexHtml } from '../browser/createIndexHtml'
-import { ProcessResults, typecheckInAnotherProcess } from '../typescript/typeCheckInAnotherProcess'
-import { watchTestMetadata } from '../tests/watchTestMetadata'
-import { CompilerOptions } from 'typescript'
 import { watchFile } from '../browser/webpack/watchFile'
 import { collectByKey } from '../common/collectByKey'
-import { Stats } from 'webpack'
-import { Results } from './Results'
 import { makeAbsolute } from '../common/makeAbsolute'
-import { getTestStats, getTestResults } from '../results'
+import { getTestResults, getTestStats } from '../results'
+import { watchTestMetadata } from '../tests/watchTestMetadata'
+import { Logger, TestMetadata } from '../types'
+import { ProcessResults, typecheckInAnotherProcess } from '../typescript/typeCheckInAnotherProcess'
+import { Results } from './Results'
+import { StatsAndResults, TypedTestOptions } from './types'
 
-const isEqual: (a: any, b: any) => boolean = require('lodash.isequal')
-const uniq = <A>(list: Array<A>): Array<A> => Array.from(new Set(list))
+const uniq = <A>(list: A[]): A[] => Array.from(new Set(list))
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 
 const updateQueue = (metadata: TestMetadata[], queue: TestMetadata[]) => {
@@ -41,7 +41,7 @@ const updateQueue = (metadata: TestMetadata[], queue: TestMetadata[]) => {
 }
 
 export async function watchBrowserTests(
-  fileGlobs: Array<string>,
+  fileGlobs: string[],
   compilerOptions: CompilerOptions,
   options: TypedTestOptions,
   cwd: string,

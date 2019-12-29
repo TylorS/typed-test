@@ -1,12 +1,12 @@
 import { createServer } from 'http'
 import { sync } from 'resolve'
+import { Configuration } from 'webpack'
 import { findOpenPort } from '../browser/findOpenPort'
 import { getLauncher, openBrowser } from '../browser/openBrowser'
 import { setupServer } from '../browser/server'
 import { setupBrowser } from '../browser/setupBrowser'
 import { Logger, TestMetadata } from '../types'
 import { StatsAndResults, TypedTestOptions } from './types'
-import { Configuration } from 'webpack'
 
 export async function runBrowserTests(
   options: TypedTestOptions,

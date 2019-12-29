@@ -155,7 +155,7 @@ function withStyle<A extends HTMLElement>(
   styles: { [K in keyof A['style']]?: A['style'][K] },
 ): A {
   const keys = Object.keys(styles) as Array<keyof A['style'] & keyof CSSStyleDeclaration>
-  keys.forEach(key => (el.style[key] = styles[key]))
+  keys.forEach(key => (el.style[key] = styles[key] as any))
 
   return el
 }
